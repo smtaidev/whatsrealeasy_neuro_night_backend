@@ -209,17 +209,17 @@ datasource db {
 
 model User {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  email             String    @unique
   name              String?
+  email             String    @unique
   phone             String?   @unique
   password          String
-  isVerified        Boolean   @default(false)
   profilePic        String?
   passwordChangedAt DateTime?
-  canResetPassword  Boolean   @default(true)
-  isResetPassword   Boolean   @default(false)
+  // isVerified        Boolean   @default(false)
+  // canResetPassword  Boolean   @default(true)
+  // isResetPassword   Boolean   @default(false)
 
-  role              Role      @default(ADMIN)
+  role              Role      @default(admin)
   isActive          Boolean   @default(true)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -235,9 +235,8 @@ model User {
 }
 
 enum Role {
-  ADMIN
-  USER
-  SUPERADMIN
+  admin
+  super_admin
 }
 
 model NumberList {

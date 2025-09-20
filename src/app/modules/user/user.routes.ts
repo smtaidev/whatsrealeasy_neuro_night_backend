@@ -1,7 +1,5 @@
-import status from "http-status";
+
 import auth from "../../middlewares/auth";
-import { upload } from "../../utils/file-upload/upload";
-import ApiError from "../../errors/AppError";
 import { UserValidation } from "./user.validation";
 import { UserController } from "./user.controller";
 import validateRequest from "../../middlewares/validateRequest";
@@ -10,24 +8,23 @@ import { Role } from "@prisma/client";
 import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
-
-router.get("/", auth(Role.ADMIN, Role.SUPERADMIN), UserController.getAllUser);
-
-router.get(
-  "/:userId",
-  auth(Role.ADMIN, Role.SUPERADMIN, Role.USER),
-  UserController.getSingleUserById
-);
-
 router.post(
   "/register",
   validateRequest(UserValidation.createUserValidationSchema),
   UserController.createUser
 );
 
+router.get("/", auth(Role.admin, Role.super_admin), UserController.getAllUser);
+
+router.get(
+  "/:userId",
+  auth(Role.admin, Role.super_admin),
+  UserController.getSingleUserById
+);
+
 router.patch(
   "/update",
-  auth(Role.USER, Role.ADMIN, Role.SUPERADMIN),
+  auth(Role.admin, Role.super_admin),
   multerUpload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
     const file = req.file;
@@ -39,20 +36,20 @@ router.patch(
     }
 
     validateRequest(UserValidation.updateUserValidationSchema),
-    UserController.updateUser(req, res, next);
+      UserController.updateUser(req, res, next);
   }
 );
 
 router.patch(
   "/:userId",
-  auth(Role.ADMIN, Role.SUPERADMIN),
+  auth(Role.admin, Role.super_admin),
   validateRequest(UserValidation.updateUserByAdminValidationSchema),
   UserController.updateUserByAdmin
 );
 
 router.delete(
   "/:userId",
-  auth(Role.ADMIN, Role.SUPERADMIN),
+  auth(Role.admin, Role.super_admin),
   UserController.deleteUser
 );
 

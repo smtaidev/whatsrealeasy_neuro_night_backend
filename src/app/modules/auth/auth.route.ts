@@ -7,19 +7,20 @@ import { Role } from "@prisma/client";
 
 const router = Router();
 
-router.get("/verify-email", AuthController.verifyEmail);
-
-router.get("/verify-reset-password", AuthController.verifyResetPassLink);
-
 router.post(
   "/login",
   validateRequest(AuthValidation.loginValidationSchema),
   AuthController.login
 );
 
+router.get("/verify-email", AuthController.verifyEmail);
+
+router.get("/verify-reset-password", AuthController.verifyResetPassLink);
+
+
 router.put(
   "/change-password",
-  auth(Role.USER, Role.ADMIN),
+  auth(Role.admin, Role.super_admin),
   validateRequest(AuthValidation.changePasswordValidationSchema),
   AuthController.changePassword
 );

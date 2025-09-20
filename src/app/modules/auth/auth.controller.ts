@@ -29,15 +29,15 @@ const login = catchAsync(async (req, res) => {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: false, // config.NODE_ENV === "production"
-    sameSite: "lax", // config.NODE_ENV === "production" ? true : "lax",
+    secure: config.NODE_ENV === "production", // config.NODE_ENV === "production"
+    sameSite: config.NODE_ENV === "production" ? true : "lax", // config.NODE_ENV === "production" ? true : "lax",
     maxAge: 24 * 60 * 60 * 1000,
   });
 
   sendResponse(res, {
     statusCode: status.OK,
     message: "User logged in successfully!",
-    data: { accessToken },
+    data: { accessToken , refreshToken },
   });
 });
 
@@ -80,7 +80,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: status.OK,
-    message: result.message,
+    message: "Password reset successfully!",
   });
 });
 

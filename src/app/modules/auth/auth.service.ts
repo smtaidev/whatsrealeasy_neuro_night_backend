@@ -24,31 +24,12 @@ const loginUser = async (email: string, password: string) => {
   }
 
   const jwtPayload = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    isVerified: user.isVerified,
-    // profilePic: payload?.profilePic || "",
+    id: user?.id,
+    name: user?.name,
+    email: user?.email,
+    role: user?.role,
+    profilePic: user?.profilePic,
   };
-
-  // Check if user is not active
-  if (!user.isVerified) {
-    const accessToken = jwtHelpers.createToken(
-      jwtPayload,
-      config.jwt.access.secret as string,
-      config.jwt.resetPassword.expiresIn as string
-    );
-
-    const confirmedLink = `${config.verify.email}?token=${accessToken}`;
-
-    await sendEmail(user.email, undefined, confirmedLink);
-
-    throw new ApiError(
-      status.UNAUTHORIZED,
-      "User is not verified! We have sent a confirmation email to your email address. Please check your inbox."
-    );
-  }
 
   const accessToken = jwtHelpers.createToken(
     jwtPayload,
@@ -82,18 +63,18 @@ const verifyEmail = async (token: string) => {
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
-  if (user.isVerified) {
-    throw new ApiError(status.BAD_REQUEST, "User already verified!");
-  }
+  // if (user.isVerified) {
+  //   throw new ApiError(status.BAD_REQUEST, "User already verified!");
+  // }
 
-  await prisma.user.update({
-    where: {
-      email: verifiedToken.email,
-    },
-    data: {
-      isVerified: true,
-    },
-  });
+  // await prisma.user.update({
+  //   where: {
+  //     email: verifiedToken.email,
+  //   },
+  //   data: {
+  //     isVerified: true,
+  //   },
+  // });
 
   return null;
 };
@@ -112,13 +93,13 @@ const verifyResetPassLink = async (token: string) => {
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
-  await prisma.user.update({
-    where: { email: verifiedToken.email },
-    data: {
-      isResetPassword: false,
-      canResetPassword: true,
-    },
-  });
+  // await prisma.user.update({
+  //   where: { email: verifiedToken.email },
+  //   data: {
+  //     isResetPassword: false,
+  //     canResetPassword: true,
+  //   },
+  // });
 
   return null;
 };
@@ -178,18 +159,7 @@ const forgotPassword = async (email: string) => {
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
-  if (!user.isVerified) {
-    throw new ApiError(status.UNAUTHORIZED, "User account is not verified!");
-  }
-
-  // Step 2: Save OTP in DB
-  await prisma.user.update({
-    where: { email },
-    data: {
-      isResetPassword: true,
-      canResetPassword: false,
-    },
-  });
+  console.log(user)
 
   const jwtPayload = {
     id: user.id,
@@ -197,13 +167,13 @@ const forgotPassword = async (email: string) => {
     email: user.email,
     profilePic: user.profilePic,
     role: user.role,
-    isVerified: user.isVerified,
+    // isVerified: user.isVerified,
   };
 
   const accessToken = jwtHelpers.createToken(
     jwtPayload,
-    config.jwt.access.secret as string,
-    config.jwt.access.expiresIn as string
+    config.jwt.refresh.secret as string,
+    config.jwt.refresh.expiresIn as string
   );
 
   const resetPassLink = `${config.verify.resetPassUI}?token=${accessToken}`;
@@ -217,7 +187,7 @@ const forgotPassword = async (email: string) => {
 };
 
 const resetPassword = async (
-  email: string,
+  token: string,
   newPassword: string,
   confirmPassword: string
 ) => {
@@ -225,34 +195,32 @@ const resetPassword = async (
     throw new ApiError(status.BAD_REQUEST, "Passwords do not match!");
   }
 
+  const verifiedToken = jwtHelpers.verifyToken(
+    token,
+    config.jwt.access.secret as string
+  );
+
+  // Step 2: Find user from decoded payload
   const user = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email: verifiedToken?.email },
   });
+
   if (!user) {
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
-  if (user.canResetPassword) {
-    throw new ApiError(
-      status.BAD_REQUEST,
-      "User is not eligible for password reset!"
-    );
-  }
-
+  // Step 3: Hash new password
   const hashedPassword = await hashPassword(newPassword);
 
+  // Step 4: Update password
   await prisma.user.update({
-    where: { email: email },
+    where: { email: verifiedToken?.email },
     data: {
       password: hashedPassword,
-      isResetPassword: false,
-      canResetPassword: false,
     },
   });
 
-  return {
-    message: "Password reset successfully!",
-  };
+  return null
 };
 
 const resendVerificationLink = async (email: string) => {
@@ -262,9 +230,9 @@ const resendVerificationLink = async (email: string) => {
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
-  if (user.isVerified) {
-    throw new ApiError(status.BAD_REQUEST, "User account already verified!");
-  }
+  // if (user.isVerified) {
+  //   throw new ApiError(status.BAD_REQUEST, "User account already verified!");
+  // }
 
   const jwtPayload = {
     id: user.id,
@@ -272,7 +240,7 @@ const resendVerificationLink = async (email: string) => {
     email: user.email,
     profilePic: user.profilePic,
     role: user.role,
-    isVerified: user.isVerified,
+    // isVerified: user.isVerified,
   };
 
   const accessToken = jwtHelpers.createToken(
@@ -304,15 +272,15 @@ const resendResetPassLink = async (email: string) => {
     email: user.email,
     profilePic: user.profilePic,
     role: user.role,
-    isVerified: user.isVerified,
+    // isVerified: user.isVerified,
   };
 
-  await prisma.user.update({
-    where: { email: user.email },
-    data: {
-      isResetPassword: true,
-    },
-  });
+  // await prisma.user.update({
+  //   where: { email: user.email },
+  //   data: {
+  //     isResetPassword: true,
+  //   },
+  // });
 
   const accessToken = jwtHelpers.createToken(
     jwtPayload,
@@ -339,7 +307,7 @@ const getMe = async (email: string) => {
       email: true,
       profilePic: true,
       role: true,
-      isVerified: true,
+      // isVerified: true,
     },
   });
 
@@ -362,7 +330,7 @@ export const refreshToken = async (token: string) => {
       email: true,
       role: true,
       profilePic: true,
-      isVerified: true,
+      // isVerified: true,
       passwordChangedAt: true,
     },
   });
@@ -389,7 +357,7 @@ export const refreshToken = async (token: string) => {
     email: user.email,
     role: user.role,
     profilePic: user?.profilePic,
-    isVerified: user.isVerified,
+    // isVerified: user.isVerified,
   };
 
   const accessToken = jwtHelpers.createToken(

@@ -25,7 +25,7 @@ export const seedSuperAdmin = async () => {
       email,
       phone: "0154090000",
       password: hashedPassword,
-      role: Role.SUPERADMIN,
+      role: Role.super_admin,
     },
   });
 

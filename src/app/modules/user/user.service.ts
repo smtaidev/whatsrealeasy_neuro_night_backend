@@ -3,19 +3,11 @@ import config from "../../config";
 import prisma from "../../utils/prisma";
 import ApiError from "../../errors/AppError";
 import { Role, User } from "@prisma/client";
-import { sendEmail } from "../../utils/sendEmail";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { jwtHelpers } from "./../../helpers/jwtHelpers";
 import { hashPassword } from "../../helpers/hashPassword";
 
 const createUserIntoDB = async (payload: User) => {
-  //  where: {
-  //     AND: [
-  //       {
-  //         OR: [{ email: payload.email }, { phone: payload.phone }],
-  //       },
-  //     ],
-  //   },
   // Check if user exists by email
   const isUserExistByEmail = await prisma.user.findUnique({
     where: { email: payload.email },
@@ -32,35 +24,41 @@ const createUserIntoDB = async (payload: User) => {
 
   const userData = {
     ...payload,
-    role: Role.USER,
+    role: Role.admin,
     isActive: true,
-    isVerified: false,
     password: hashedPassword,
   };
 
+  const result = await prisma.user.create({ data: userData });
+  
+  if (!result) {
+    throw new ApiError(status.BAD_REQUEST, "Failed to create user!");
+  }
+  
   const jwtPayload = {
     id: payload.id,
     name: payload.name,
     email: payload.email,
     role: userData.role,
-    isVerified: userData.isVerified,
-    // profilePic: payload?.profilePic || "",
+    profilePic: payload?.profilePic || "",
   };
-
+  
   const accessToken = jwtHelpers.createToken(
     jwtPayload,
     config.jwt.access.secret as string,
-    config.jwt.resetPassword.expiresIn as string
+    config.jwt.access.expiresIn as string
   );
 
-  const confirmedLink = `${config.verify.email}?token=${accessToken}`;
-  console.log("Confirmed Link:", confirmedLink);
-  await prisma.user.create({ data: userData });
-  await sendEmail(payload.email, undefined, confirmedLink);
+  const refreshToken = jwtHelpers.createToken(
+    jwtPayload,
+    config.jwt.refresh.secret as string,
+    config.jwt.refresh.expiresIn as string
+  );
+
 
   return {
-    message:
-      "We have sent a confirmation email to your email address. Please check your inbox.",
+    accessToken,
+    refreshToken,
   };
 };
 
@@ -130,7 +128,6 @@ const updateUserIntoDB = async (user: User, payload: Partial<User>) => {
       email: true,
       profilePic: true,
       role: true,
-      isVerified: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -144,8 +141,7 @@ const updateUserByAdminIntoDB = async (
   user_id: string,
   payload: Partial<User>
 ) => {
-
-  console.log("Payload in Service:", payload)
+  console.log("Payload in Service:", payload);
   const isUserExist = await prisma.user.findUnique({
     where: { id: user_id },
   });
@@ -158,34 +154,34 @@ const updateUserByAdminIntoDB = async (
   const updatedData: Partial<User> = {};
 
   // Check permissions based on admin role
-  if (authUser.role === Role.SUPERADMIN) {
-    // SUPERADMIN can update both role and isActive
-    if (payload.role !== undefined) {
-      updatedData.role = payload.role;
-    }
-    if (payload.isActive !== undefined) {
-      updatedData.isActive = payload.isActive;
-    }
-  } else if (authUser.role === Role.ADMIN) {
-    // ADMIN can only update isActive status if the user is a regular USER
-    if (payload.isActive && isUserExist.role === Role.USER) {
-      updatedData.isActive = payload.isActive;
-    }
-    
-    // ADMIN cannot change roles - check if they're trying to
-    if (payload.role !== undefined && payload.role !== isUserExist.role) {
-      throw new ApiError(
-        status.FORBIDDEN,
-        "Admins are not allowed to change user roles. Only Super Admins can modify roles."
-      );
-    }
-  } else {
-    // Other roles shouldn't have access to this function
-    throw new ApiError(
-      status.FORBIDDEN,
-      "You do not have permission to update user information."
-    );
-  }
+  // if (authUser.role === Role.SUPERADMIN) {
+  //   // SUPERADMIN can update both role and isActive
+  //   if (payload.role !== undefined) {
+  //     updatedData.role = payload.role;
+  //   }
+  //   if (payload.isActive !== undefined) {
+  //     updatedData.isActive = payload.isActive;
+  //   }
+  // } else if (authUser.role === Role.ADMIN) {
+  //   // ADMIN can only update isActive status if the user is a regular USER
+  //   if (payload.isActive && isUserExist.role === Role.USER) {
+  //     updatedData.isActive = payload.isActive;
+  //   }
+
+  //   // ADMIN cannot change roles - check if they're trying to
+  //   if (payload.role !== undefined && payload.role !== isUserExist.role) {
+  //     throw new ApiError(
+  //       status.FORBIDDEN,
+  //       "Admins are not allowed to change user roles. Only Super Admins can modify roles."
+  //     );
+  //   }
+  // } else {
+  //   // Other roles shouldn't have access to this function
+  //   throw new ApiError(
+  //     status.FORBIDDEN,
+  //     "You do not have permission to update user information."
+  //   );
+  // }
 
   // Check if there's anything to update
   // if (Object.keys(updatedData).length === 0) {
@@ -205,7 +201,7 @@ const updateUserByAdminIntoDB = async (
       profilePic: true,
       role: true,
       isActive: true,
-      isVerified: true,
+      // isVerified: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -249,5 +245,5 @@ export const UserService = {
   updateUserIntoDB,
   deleteUserFromDB,
   getSingleUserByIdFromDB,
-  updateUserByAdminIntoDB
+  updateUserByAdminIntoDB,
 };
