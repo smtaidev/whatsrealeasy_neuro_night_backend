@@ -309,9 +309,13 @@ const getMe = async (email: string) => {
       id: true,
       name: true,
       email: true,
+      phone: true,
       profilePic: true,
       role: true,
-      // isVerified: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      passwordChangedAt: true,
     },
   });
 
