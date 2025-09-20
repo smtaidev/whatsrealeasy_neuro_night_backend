@@ -8,18 +8,24 @@ import { jwtHelpers } from "./../../helpers/jwtHelpers";
 import { hashPassword } from "../../helpers/hashPassword";
 
 const createUserIntoDB = async (payload: User) => {
-  // Check if user exists by email
-  const isUserExistByEmail = await prisma.user.findUnique({
-    where: { email: payload.email },
+  // Check if user exists by email or phone
+  const isUserExist = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: payload?.email },
+        { phone: payload?.phone },
+      ],
+    },
   });
 
-  if (isUserExistByEmail) {
+  if (isUserExist) {
     throw new ApiError(
       status.BAD_REQUEST,
-      `User with this email: ${payload.email} already exists!`
+      `User with this email/phone already exists!`
     );
   }
 
+  // Hash password
   const hashedPassword = await hashPassword(payload.password);
 
   const userData = {
@@ -29,20 +35,23 @@ const createUserIntoDB = async (payload: User) => {
     password: hashedPassword,
   };
 
+  // Create user
   const result = await prisma.user.create({ data: userData });
-  
+
   if (!result) {
     throw new ApiError(status.BAD_REQUEST, "Failed to create user!");
   }
-  
+
+  // JWT payload
   const jwtPayload = {
-    id: payload.id,
-    name: payload.name,
-    email: payload.email,
-    role: userData.role,
-    profilePic: payload?.profilePic || "",
+    id: result.id,
+    name: result.name,
+    email: result.email,
+    role: result.role,
+    profilePic: result?.profilePic || "",
   };
-  
+
+  // Generate tokens
   const accessToken = jwtHelpers.createToken(
     jwtPayload,
     config.jwt.access.secret as string,
@@ -55,12 +64,12 @@ const createUserIntoDB = async (payload: User) => {
     config.jwt.refresh.expiresIn as string
   );
 
-
   return {
     accessToken,
     refreshToken,
   };
 };
+
 
 const getAllUserFromDB = async (query: Record<string, unknown>) => {
   const userQuery = new QueryBuilder(prisma.user, query)

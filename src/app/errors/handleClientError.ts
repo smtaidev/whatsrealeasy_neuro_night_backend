@@ -22,8 +22,20 @@ const handleClientError = (error: Prisma.PrismaClientKnownRequestError) => {
       }
       break;
 
+    // case "P2002":
+    //   const target = (error.meta?.target as string[])?.join(", ") || "field";
+    //   message = `${target} already exists.`;
+    //   errors = [{ path: target, message }];
+    //   break;
     case "P2002":
-      const target = (error.meta?.target as string[])?.join(", ") || "field";
+      let target = "field";
+
+      if (Array.isArray(error.meta?.target)) {
+        target = error.meta?.target.join(", ");
+      } else if (typeof error.meta?.target === "string") {
+        target = error.meta?.target;
+      }
+
       message = `${target} already exists.`;
       errors = [{ path: target, message }];
       break;

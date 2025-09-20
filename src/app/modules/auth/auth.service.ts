@@ -159,7 +159,7 @@ const forgotPassword = async (email: string) => {
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
-  console.log(user)
+  console.log(user);
 
   const jwtPayload = {
     id: user.id,
@@ -197,7 +197,7 @@ const resetPassword = async (
 
   const verifiedToken = jwtHelpers.verifyToken(
     token,
-    config.jwt.access.secret as string
+    config.jwt.refresh.secret as string
   );
 
   // Step 2: Find user from decoded payload
@@ -209,18 +209,22 @@ const resetPassword = async (
     throw new ApiError(status.NOT_FOUND, "User not found!");
   }
 
+  console.log(user)
   // Step 3: Hash new password
   const hashedPassword = await hashPassword(newPassword);
 
   // Step 4: Update password
-  await prisma.user.update({
+  const result = await prisma.user.update({
     where: { email: verifiedToken?.email },
     data: {
       password: hashedPassword,
     },
   });
 
-  return null
+  console.log(result)
+
+  const { password, ...others } = result;
+  return others;
 };
 
 const resendVerificationLink = async (email: string) => {

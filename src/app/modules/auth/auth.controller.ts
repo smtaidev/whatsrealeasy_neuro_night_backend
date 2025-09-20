@@ -70,10 +70,11 @@ const forgotPassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  const { email, newPassword, confirmPassword } = req.body;
+  const { token, newPassword, confirmPassword } = req.body;
 
+  console.log(token, newPassword, confirmPassword)
   const result = await AuthService.resetPassword(
-    email,
+    token,
     newPassword,
     confirmPassword
   );
@@ -81,6 +82,7 @@ const resetPassword = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: status.OK,
     message: "Password reset successfully!",
+    data: result,
   });
 });
 
