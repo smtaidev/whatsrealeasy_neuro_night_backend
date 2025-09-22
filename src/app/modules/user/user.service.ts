@@ -12,8 +12,7 @@ const createUserIntoDB = async (payload: User) => {
   const isUserExist = await prisma.user.findFirst({
     where: {
       OR: [
-        { email: payload?.email },
-        { phone: payload?.phone },
+        { email: payload?.email }
       ],
     },
   });
@@ -124,7 +123,6 @@ const updateUserIntoDB = async (user: User, payload: Partial<User>) => {
 
   const updatedData: Partial<User> = {
     name: payload.name,
-    phone: payload.phone,
     profilePic: payload.profilePic || "",
   };
 

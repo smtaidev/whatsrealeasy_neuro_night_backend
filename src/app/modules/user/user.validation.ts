@@ -9,12 +9,12 @@ const createUserValidationSchema = z.object({
     email: z
       .string({ required_error: "Email is required." })
       .email("Invalid email address"),
-    phone: z
-      .string({
-        required_error: "Phone number is required.",
-        invalid_type_error: "Phone number must be a string.",
-      })
-      .optional(),
+    // phone: z
+    //   .string({
+    //     required_error: "Phone number is required.",
+    //     invalid_type_error: "Phone number must be a string.",
+    //   })
+    //   .optional(),
     password: z
       .string({
         required_error: "Password is required.",
@@ -32,11 +32,11 @@ const updateUserValidationSchema = z.object({
       })
       .optional(),
 
-    phone: z
-      .string({
-        invalid_type_error: "Phone number must be a string.",
-      })
-      .optional(),
+    // phone: z
+    //   .string({
+    //     invalid_type_error: "Phone number must be a string.",
+    //   })
+    //   .optional(),
     role: z
       .string({
         invalid_type_error: "Role must be a string.",

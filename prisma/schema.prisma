@@ -1,57 +1,54 @@
-// // schema.prisma
 
-// generator client {
-//   provider = "prisma-client-js"
-// }
+generator client {
+  provider = "prisma-client-js"
+}
 
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
 
-// model User {
-//   id                String    @id @default(cuid())
-//   email             String    @unique
-//   name              String?
-//   phone             String?   @unique
-//   password          String
-//   isVerified        Boolean   @default(false)
-//   profilePic        String?
-//   passwordChangedAt DateTime?
-//   canResetPassword  Boolean   @default(true)
-//   isResetPassword   Boolean   @default(false)
-  
-//   role              Role      @default(ADMIN)
-//   isActive          Boolean   @default(true)
-//   createdAt         DateTime  @default(now())
-//   updatedAt         DateTime  @updatedAt
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  name              String?
+  email             String    @unique
+  password          String
+  profilePic        String?
+  passwordChangedAt DateTime?
+  // isVerified        Boolean   @default(false)
+  // canResetPassword  Boolean   @default(true)
+  // isResetPassword   Boolean   @default(false)
 
-//   // Relations
-//   numberLists  NumberList[]
-//   callLogs     CallLog[]
-//   callSettings CallSettings[]
-//   appointments Appointment[]
-//   templates    Template[]
+  role              Role      @default(admin)
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-//   @@map("users")
-// }
+  // Relations
+  // numberLists  NumberList[]
+  // callLogs     CallLog[]
+  // callSettings CallSettings[]
+  // appointments Appointment[]
+  // templates    Template[]
 
-// enum Role {
-//   ADMIN
-//   USER
-//   SUPERADMIN
-// }
+  @@map("users")
+}
+
+enum Role {
+  admin
+  super_admin
+}
 
 // model NumberList {
-//   id           String   @id @default(cuid())
-//   name         String? // will get from uploaded file name if not provided
+//   id           String   @id @default(auto()) @map("_id") @db.ObjectId
+//   name         String?
 //   description  String?
 //   totalNumbers Int?
 //   uploadedAt   DateTime @default(now())
 
 //   // Relations
-//   uploadedBy   String
-//   user         User          @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+//   uploadedBy   String   @db.ObjectId
+//   user         User     @relation(fields: [uploadedBy], references: [id])
 //   phoneNumbers PhoneNumber[]
 //   callSettings CallSettings?
 
@@ -59,8 +56,8 @@
 // }
 
 // model PhoneNumber {
-//   id           String            @id @default(cuid())
-//   phone  String
+//   id           String            @id @default(auto()) @map("_id") @db.ObjectId
+//   phone        String
 //   companyName  String?
 //   contactName  String?
 //   notes        String?
@@ -69,8 +66,8 @@
 //   lastCalledAt DateTime?
 
 //   // Relations
-//   numberListId String
-//   numberList   NumberList @relation(fields: [numberListId], references: [id], onDelete: Cascade)
+//   numberListId String     @db.ObjectId
+//   numberList   NumberList @relation(fields: [numberListId], references: [id])
 //   callLogs     CallLog[]
 
 //   @@map("phone_numbers")
@@ -85,44 +82,44 @@
 // }
 
 // model CallSettings {
-//   id             String   @id @default(cuid())
+//   id             String   @id @default(auto()) @map("_id") @db.ObjectId
 //   startDate      DateTime
-//   dailyStartTime String // Format: "HH:MM"
-//   dailyEndTime   String // Format: "HH:MM"
-//   callDuration   Int // In seconds
+//   dailyStartTime String
+//   dailyEndTime   String
+//   callDuration   Int
 //   isActive       Boolean  @default(false)
 //   createdAt      DateTime @default(now())
 //   updatedAt      DateTime @updatedAt
 
 //   // Relations
-//   numberListId String     @unique
-//   numberList   NumberList @relation(fields: [numberListId], references: [id], onDelete: Cascade)
-//   createdBy    String
-//   user         User       @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+//   numberListId String     @unique @db.ObjectId
+//   numberList   NumberList @relation(fields: [numberListId], references: [id])
+//   createdBy    String     @db.ObjectId
+//   user         User       @relation(fields: [createdBy], references: [id])
 
 //   @@map("call_settings")
 // }
 
 // model CallLog {
-//   id           String     @id @default(cuid())
+//   id           String     @id @default(auto()) @map("_id") @db.ObjectId
 //   phoneNumber  String
 //   startTime    DateTime   @default(now())
 //   endTime      DateTime?
-//   duration     Int? // In seconds
+//   duration     Int?
 //   status       CallStatus
 //   recordingUrl String?
 //   transcript   String?
 
-//   // AI-extracted information
-//   servicesMentioned String[] // Services client is interested in
-//   painPoints        String[] // Client's pain points
-//   objections        String[] // Reasons for rejection
+//   // AI-extracted info
+//   servicesMentioned String[]
+//   painPoints        String[]
+//   objections        String[]
 //   bookingStatus     BookingStatus @default(NOT_ATTEMPTED)
 
 //   // Relations
-//   userId          String
-//   user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   phoneNumberId   String?
+//   userId          String      @db.ObjectId
+//   user            User        @relation(fields: [userId], references: [id])
+//   phoneNumberId   String?     @db.ObjectId
 //   phoneNumberData PhoneNumber? @relation(fields: [phoneNumberId], references: [id])
 //   appointment     Appointment?
 
@@ -146,7 +143,7 @@
 // }
 
 // model Appointment {
-//   id            String            @id @default(cuid())
+//   id            String            @id @default(auto()) @map("_id") @db.ObjectId
 //   clientName    String?
 //   companyName   String?
 //   phoneNumber   String
@@ -154,13 +151,13 @@
 //   notes         String?
 //   dateTime      DateTime
 //   status        AppointmentStatus @default(SCHEDULED)
-//   googleEventId String? // Google Calendar event ID
+//   googleEventId String?
 
 //   // Relations
-//   callLogId String?  @unique
+//   callLogId String?  @unique @db.ObjectId
 //   callLog   CallLog? @relation(fields: [callLogId], references: [id])
-//   createdBy String
-//   user      User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+//   createdBy String   @db.ObjectId
+//   user      User     @relation(fields: [createdBy], references: [id])
 
 //   @@map("appointments")
 // }
@@ -173,9 +170,8 @@
 //   RESCHEDULED
 // }
 
-// // Template model for call scripts and messages
 // model Template {
-//   id        String       @id @default(cuid())
+//   id        String       @id @default(auto()) @map("_id") @db.ObjectId
 //   name      String
 //   type      TemplateType
 //   content   String
@@ -184,8 +180,8 @@
 //   updatedAt DateTime     @updatedAt
 
 //   // Relations
-//   createdBy String
-//   user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+//   createdBy String @db.ObjectId
+//   user      User   @relation(fields: [createdBy], references: [id])
 
 //   @@map("templates")
 // }
@@ -196,202 +192,6 @@
 //   FALLBACK
 //   APPOINTMENT_CONFIRMATION
 // }
-// schema.prisma
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  name              String?
-  email             String    @unique
-  phone             String?   @unique
-  password          String
-  profilePic        String?
-  passwordChangedAt DateTime?
-  // isVerified        Boolean   @default(false)
-  // canResetPassword  Boolean   @default(true)
-  // isResetPassword   Boolean   @default(false)
-
-  role              Role      @default(admin)
-  isActive          Boolean   @default(true)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relations
-  numberLists  NumberList[]
-  callLogs     CallLog[]
-  callSettings CallSettings[]
-  appointments Appointment[]
-  templates    Template[]
-
-  @@map("users")
-}
-
-enum Role {
-  admin
-  super_admin
-}
-
-model NumberList {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String?
-  description  String?
-  totalNumbers Int?
-  uploadedAt   DateTime @default(now())
-
-  // Relations
-  uploadedBy   String   @db.ObjectId
-  user         User     @relation(fields: [uploadedBy], references: [id])
-  phoneNumbers PhoneNumber[]
-  callSettings CallSettings?
-
-  @@map("number_lists")
-}
-
-model PhoneNumber {
-  id           String            @id @default(auto()) @map("_id") @db.ObjectId
-  phone        String
-  companyName  String?
-  contactName  String?
-  notes        String?
-  status       PhoneNumberStatus @default(PENDING)
-  callAttempts Int               @default(0)
-  lastCalledAt DateTime?
-
-  // Relations
-  numberListId String     @db.ObjectId
-  numberList   NumberList @relation(fields: [numberListId], references: [id])
-  callLogs     CallLog[]
-
-  @@map("phone_numbers")
-}
-
-enum PhoneNumberStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  FAILED
-  DO_NOT_CALL
-}
-
-model CallSettings {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  startDate      DateTime
-  dailyStartTime String
-  dailyEndTime   String
-  callDuration   Int
-  isActive       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Relations
-  numberListId String     @unique @db.ObjectId
-  numberList   NumberList @relation(fields: [numberListId], references: [id])
-  createdBy    String     @db.ObjectId
-  user         User       @relation(fields: [createdBy], references: [id])
-
-  @@map("call_settings")
-}
-
-model CallLog {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  phoneNumber  String
-  startTime    DateTime   @default(now())
-  endTime      DateTime?
-  duration     Int?
-  status       CallStatus
-  recordingUrl String?
-  transcript   String?
-
-  // AI-extracted info
-  servicesMentioned String[]
-  painPoints        String[]
-  objections        String[]
-  bookingStatus     BookingStatus @default(NOT_ATTEMPTED)
-
-  // Relations
-  userId          String      @db.ObjectId
-  user            User        @relation(fields: [userId], references: [id])
-  phoneNumberId   String?     @db.ObjectId
-  phoneNumberData PhoneNumber? @relation(fields: [phoneNumberId], references: [id])
-  appointment     Appointment?
-
-  @@map("call_logs")
-}
-
-enum CallStatus {
-  INITIATED
-  IN_PROGRESS
-  COMPLETED
-  FAILED
-  NO_ANSWER
-  BUSY
-}
-
-enum BookingStatus {
-  NOT_ATTEMPTED
-  SUCCESSFUL
-  REJECTED
-  CALLBACK_REQUESTED
-}
-
-model Appointment {
-  id            String            @id @default(auto()) @map("_id") @db.ObjectId
-  clientName    String?
-  companyName   String?
-  phoneNumber   String
-  serviceType   String?
-  notes         String?
-  dateTime      DateTime
-  status        AppointmentStatus @default(SCHEDULED)
-  googleEventId String?
-
-  // Relations
-  callLogId String?  @unique @db.ObjectId
-  callLog   CallLog? @relation(fields: [callLogId], references: [id])
-  createdBy String   @db.ObjectId
-  user      User     @relation(fields: [createdBy], references: [id])
-
-  @@map("appointments")
-}
-
-enum AppointmentStatus {
-  SCHEDULED
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-  RESCHEDULED
-}
-
-model Template {
-  id        String       @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  type      TemplateType
-  content   String
-  isActive  Boolean      @default(true)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  // Relations
-  createdBy String @db.ObjectId
-  user      User   @relation(fields: [createdBy], references: [id])
-
-  @@map("templates")
-}
-
-enum TemplateType {
-  GREETING
-  MARKETING
-  FALLBACK
-  APPOINTMENT_CONFIRMATION
-}
 
 
 
