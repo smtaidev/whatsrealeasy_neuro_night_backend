@@ -309,7 +309,6 @@ const getMe = async (email: string) => {
       id: true,
       name: true,
       email: true,
-      phone: true,
       profilePic: true,
       role: true,
       isActive: true,
