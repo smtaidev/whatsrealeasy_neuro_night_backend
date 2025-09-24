@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
+    "ps": "npx prisma db push",
     "start": "node dist/index.js"
   },
   "devDependencies": {
