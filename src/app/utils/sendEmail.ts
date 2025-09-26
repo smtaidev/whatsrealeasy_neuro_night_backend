@@ -16,50 +16,40 @@ export const sendEmail = async (
     },
   });
 
-  const formattedDate = new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date());
+  // const formattedDate = new Intl.DateTimeFormat("en-US", {
+  //   dateStyle: "medium",
+  //   timeStyle: "short",
+  // }).format(new Date());
 
-  const clickableResetPass = `<a href="${resetPassLink}" style="color: #28C76F; text-decoration: underline;">here</a>`;
-  const clickableConfirm = `<a href="${confirmLink}" style="color: #28C76F; text-decoration: underline;">here</a>`;
+  // const clickableResetPass = `<a href="${resetPassLink}" style="color: #28C76F; text-decoration: underline;">here</a>`;
+  // const clickableConfirm = `<a href="${confirmLink}" style="color: #28C76F; text-decoration: underline;">here</a>`;
 
   const html = `
   <div style="max-width: 600px; margin: 0 auto; background-color: #F6F7F9; color: #000; border-radius: 8px; padding: 24px;">
-    <table style="width: 100%;">
-      <tr>
-        <td>
-          <div style="padding: 5px; text-align: center;">
-            <img src="https://res.cloudinary.com/shariful10/image/upload/v1751971147/logo_cfqynn.png" alt="logo" style="height: 40px; margin-bottom: 16px;" />
-          </div>
-        </td>
-        <td style="text-align: right; color: #999;">${formattedDate}</td>
-      </tr>
-    </table>
-
-    
     ${
       confirmLink
-        ? `<h3 style="text-align: center; color: #000;">Verify Your Email Within 10 Minutes</h3>
-       <div style="padding: 0 1em;">
-         <p style="text-align: left; line-height: 28px; color: #000;">
-           <strong style="color: #000;">Verification Link:</strong> Click ${clickableConfirm} to verify your email.
-         </p>
-       </div>`
-        : `<h3 style="text-align: center; color: #000;">Reset Your Password Within 10 Minutes</h3>
-       <div style="padding: 0 1em;">
-         <p style="text-align: left; line-height: 28px; color: #000;">
-       
-           <strong style="color: #000;">Reset Link:</strong> Click ${clickableResetPass} to reset your password.
-         </p>
-       </div>`
+        ? `
+          <h3 style="text-align: center; color: #000;">Verify Your Email Within 5 Minutes</h3>
+          <div style="padding: 0 1em; text-align: center;">
+            <a href="${confirmLink}" 
+               style="display: inline-block; padding: 12px 24px; background-color: #28C76F; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">
+               Verify Email
+            </a>
+          </div>`
+        : `
+          <h3 style="text-align: center; color: #000;">Reset Your Password Within 5 Minutes</h3>
+          <div style="padding: 0 1em; text-align: center;">
+            <a href="${resetPassLink}" 
+               style="display: inline-block; padding: 12px 24px; background-color: #28C76F; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">
+               Reset Password
+            </a>
+          </div>`
     }
   </div>
-  `;
-
+`;
 
   await transporter.sendMail({
-    from: `"Super Job" <${config.sendEmail.email_from}>`,
+    from: `"Whats Real Easy" <${config.sendEmail.email_from}>`,
     to,
     subject: `${
       resetPassLink
