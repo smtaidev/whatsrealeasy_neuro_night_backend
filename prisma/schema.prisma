@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,183 +14,99 @@ model User {
   password          String
   profilePic        String?
   passwordChangedAt DateTime?
-  // isVerified        Boolean   @default(false)
-  // canResetPassword  Boolean   @default(true)
-  // isResetPassword   Boolean   @default(false)
-
   role              Role      @default(admin)
   isActive          Boolean   @default(true)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  // Relations
-  // numberLists  NumberList[]
-  // callLogs     CallLog[]
-  // callSettings CallSettings[]
-  // appointments Appointment[]
-  // templates    Template[]
+  // Google Calendar tokens
+  googleAccessToken  String?
+  googleRefreshToken String?
+  googleExpiryDate   BigInt? // store expiry in ms
+  googleScope        String?
 
   @@map("users")
 }
 
 enum Role {
-  admin
   super_admin
+  admin
 }
 
-// model NumberList {
-//   id           String   @id @default(auto()) @map("_id") @db.ObjectId
-//   name         String?
-//   description  String?
-//   totalNumbers Int?
-//   uploadedAt   DateTime @default(now())
+model Booking {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  callLogId String?  @db.ObjectId @unique
+  callLog   CallLog? @relation(fields: [callLogId], references: [id])
 
-//   // Relations
-//   uploadedBy   String   @db.ObjectId
-//   user         User     @relation(fields: [uploadedBy], references: [id])
-//   phoneNumbers PhoneNumber[]
-//   callSettings CallSettings?
+  // Appointment details
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  timeZone    String?  @default("UTC")
 
-//   @@map("number_lists")
-// }
+  // Google Calendar integration
+  googleEventId String? // store the event id (from Google Calendar API)
+  meetLink      String? // Google Meet link if created
+  calendarLink  String? // htmlLink from calendar
 
-// model PhoneNumber {
-//   id           String            @id @default(auto()) @map("_id") @db.ObjectId
-//   phone        String
-//   companyName  String?
-//   contactName  String?
-//   notes        String?
-//   status       PhoneNumberStatus @default(PENDING)
-//   callAttempts Int               @default(0)
-//   lastCalledAt DateTime?
+  status String?
 
-//   // Relations
-//   numberListId String     @db.ObjectId
-//   numberList   NumberList @relation(fields: [numberListId], references: [id])
-//   callLogs     CallLog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-//   @@map("phone_numbers")
-// }
+  @@map("bookings")
+}
 
-// enum PhoneNumberStatus {
-//   PENDING
-//   IN_PROGRESS
-//   COMPLETED
-//   FAILED
-//   DO_NOT_CALL
-// }
+model Service {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  serviceName           String
+  voiceId               String
+  voiceName             String
+  phoneNumber           String
+  requires_verification Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  phone_number_id       String
 
-// model CallSettings {
-//   id             String   @id @default(auto()) @map("_id") @db.ObjectId
-//   startDate      DateTime
-//   dailyStartTime String
-//   dailyEndTime   String
-//   callDuration   Int
-//   isActive       Boolean  @default(false)
-//   createdAt      DateTime @default(now())
-//   updatedAt      DateTime @updatedAt
+  callLogs CallLog[]
 
-//   // Relations
-//   numberListId String     @unique @db.ObjectId
-//   numberList   NumberList @relation(fields: [numberListId], references: [id])
-//   createdBy    String     @db.ObjectId
-//   user         User       @relation(fields: [createdBy], references: [id])
+  @@map("services")
+}
 
-//   @@map("call_settings")
-// }
+model CallLog {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  call_sid String
+  agent_id String
 
-// model CallLog {
-//   id           String     @id @default(auto()) @map("_id") @db.ObjectId
-//   phoneNumber  String
-//   startTime    DateTime   @default(now())
-//   endTime      DateTime?
-//   duration     Int?
-//   status       CallStatus
-//   recordingUrl String?
-//   transcript   String?
+  serviceId String  @db.ObjectId
+  service   Service @relation(fields: [serviceId], references: [id])
 
-//   // AI-extracted info
-//   servicesMentioned String[]
-//   painPoints        String[]
-//   objections        String[]
-//   bookingStatus     BookingStatus @default(NOT_ATTEMPTED)
+  conversation_id    String
+  from_number        String
+  to_number          String
+  callType           String
+  call_status        String
+  call_time          DateTime
+  call_started_at    DateTime?
+  call_completed_at  DateTime?
+  call_duration      Int?
+  recording_duration Int?
+  call_transcript    String?
+  call_recording     String?
 
-//   // Relations
-//   userId          String      @db.ObjectId
-//   user            User        @relation(fields: [userId], references: [id])
-//   phoneNumberId   String?     @db.ObjectId
-//   phoneNumberData PhoneNumber? @relation(fields: [phoneNumberId], references: [id])
-//   appointment     Appointment?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-//   @@map("call_logs")
-// }
+  // Additional fields
+  name           String?
+  contact_number String?
+  company        String?
+  meeting_time   String?
+  area           String?
+  description    String?
 
-// enum CallStatus {
-//   INITIATED
-//   IN_PROGRESS
-//   COMPLETED
-//   FAILED
-//   NO_ANSWER
-//   BUSY
-// }
+  bookings Booking?
 
-// enum BookingStatus {
-//   NOT_ATTEMPTED
-//   SUCCESSFUL
-//   REJECTED
-//   CALLBACK_REQUESTED
-// }
-
-// model Appointment {
-//   id            String            @id @default(auto()) @map("_id") @db.ObjectId
-//   clientName    String?
-//   companyName   String?
-//   phoneNumber   String
-//   serviceType   String?
-//   notes         String?
-//   dateTime      DateTime
-//   status        AppointmentStatus @default(SCHEDULED)
-//   googleEventId String?
-
-//   // Relations
-//   callLogId String?  @unique @db.ObjectId
-//   callLog   CallLog? @relation(fields: [callLogId], references: [id])
-//   createdBy String   @db.ObjectId
-//   user      User     @relation(fields: [createdBy], references: [id])
-
-//   @@map("appointments")
-// }
-
-// enum AppointmentStatus {
-//   SCHEDULED
-//   CONFIRMED
-//   CANCELLED
-//   COMPLETED
-//   RESCHEDULED
-// }
-
-// model Template {
-//   id        String       @id @default(auto()) @map("_id") @db.ObjectId
-//   name      String
-//   type      TemplateType
-//   content   String
-//   isActive  Boolean      @default(true)
-//   createdAt DateTime     @default(now())
-//   updatedAt DateTime     @updatedAt
-
-//   // Relations
-//   createdBy String @db.ObjectId
-//   user      User   @relation(fields: [createdBy], references: [id])
-
-//   @@map("templates")
-// }
-
-// enum TemplateType {
-//   GREETING
-//   MARKETING
-//   FALLBACK
-//   APPOINTMENT_CONFIRMATION
-// }
-
-
-
+  @@map("call_logs")
+}

@@ -1,0 +1,28 @@
+// appointment.routes.ts
+import { Router } from 'express';
+import auth from '../../middlewares/auth';
+import { Role } from '@prisma/client';
+import { GoogleCalendarController } from './appointment.controller';
+
+const router = Router();
+
+// ==================== PUBLIC ROUTES (OAuth Flow) ====================
+// These are for the initial Google OAuth authentication
+router.get("/auth/initiate", GoogleCalendarController.initiateAuth); // Start OAuth flow
+router.get("/redirect", GoogleCalendarController.handleOAuthCallback); // Google redirects here
+
+// ==================== PROTECTED ROUTES (Require Super Admin) ====================
+// Authentication status check
+router.get("/auth/status", auth(Role.super_admin), GoogleCalendarController.getAuthStatus);
+
+// Calendar management
+router.get("/calendars", auth(Role.super_admin), GoogleCalendarController.listCalendars);
+router.get("/events", auth(Role.super_admin), GoogleCalendarController.listEvents);
+
+// Appointment management
+router.post("/", auth(Role.super_admin), GoogleCalendarController.setAppointment);
+router.get("/", auth(Role.super_admin), GoogleCalendarController.getAppointment);
+router.delete("/", auth(Role.super_admin), GoogleCalendarController.cancelAppointment);
+router.patch("/clear", auth(Role.super_admin), GoogleCalendarController.clearAppointment);
+
+export const appointmentRoutes = router;

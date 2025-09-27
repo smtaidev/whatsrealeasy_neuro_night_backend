@@ -10,9 +10,11 @@ const auth = (...requiredRoles: Role[]) => {
   return catchAsync(async (req, _res, next) => {
     let token = req.headers.authorization;
 
-    if (token && token.startsWith("Bearer")) {
-      token = req.headers.authorization?.split(" ")[1].trim();
-    }
+    // if (token && token.startsWith("Bearer")) {
+    //   token = req.headers.authorization?.split(" ")[1].trim();
+    // }
+
+    console.log("Auth Token:", token)
 
     if (!token) {
       throw new ApiError(status.UNAUTHORIZED, "You are not authorized");
