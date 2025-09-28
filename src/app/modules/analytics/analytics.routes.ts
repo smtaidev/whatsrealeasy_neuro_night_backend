@@ -8,5 +8,6 @@ const router = Router();
 
 
 router.get("/", auth(Role.super_admin), AnalyticsController.getDashbaordAnalytics);
+router.get("/services", auth(Role.super_admin), AnalyticsController.getDashbaordServices);
 
 export const AnalyticsRoutes = router;
