@@ -76,18 +76,18 @@ model Service {
 
 model CallLog {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
-  call_sid String
+  call_sid String?
   agent_id String
 
   serviceId String  @db.ObjectId
   service   Service @relation(fields: [serviceId], references: [id])
 
-  conversation_id    String
+  conversation_id    String?
   from_number        String
   to_number          String
   callType           String
   call_status        String
-  call_time          DateTime
+  call_time          DateTime?
   call_started_at    DateTime?
   call_completed_at  DateTime?
   call_duration      Int?
@@ -108,5 +108,5 @@ model CallLog {
 
   bookings Booking?
 
-  @@map("call_logs")
+  @@map("AICallLog")
 }
