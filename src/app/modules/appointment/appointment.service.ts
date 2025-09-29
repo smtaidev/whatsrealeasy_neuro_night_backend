@@ -67,7 +67,7 @@ const refreshAccessToken = async (): Promise<void> => {
     );
 
     oAuth2Client.setCredentials(credentials);
-    console.log("Access token refreshed successfully");
+    // console.log("Access token refreshed successfully");
   } catch (error) {
     console.error("Error refreshing access token:", error);
     throw error;
@@ -81,6 +81,7 @@ const ensureValidToken = async (): Promise<void> => {
 };
 
 const generateAuthUrl = (): string => {
+  console.log("hitting")
   if (!oAuth2Client) initializeOAuthClient();
 
   return oAuth2Client.generateAuthUrl({

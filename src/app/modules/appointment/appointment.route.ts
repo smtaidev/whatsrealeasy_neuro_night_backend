@@ -26,3 +26,7 @@ router.delete("/", auth(Role.super_admin), GoogleCalendarController.cancelAppoin
 router.patch("/clear", auth(Role.super_admin), GoogleCalendarController.clearAppointment);
 
 export const appointmentRoutes = router;
+
+
+// http://localhost:5000/api/v1/appointments/auth/initiate
+// http://localhost:5000/api/v1/appointments/redirect

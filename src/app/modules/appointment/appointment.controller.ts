@@ -6,7 +6,9 @@ import { googleCalendarService } from './appointment.service';
 import { AppointmentEventData } from './appointment.interface';
 
 const redirectToGoogleAuth = catchAsync(async (req: Request, res: Response) => {
+  console.log('Redirecting to Google OAuth')
   const authUrl = googleCalendarService.generateAuthUrl();
+  console.log('Auth URL:', authUrl)
   res.redirect(authUrl);
 });
 
@@ -46,7 +48,7 @@ const getAuthStatus = catchAsync(async (req: Request, res: Response) => {
 
 const initiateAuth = catchAsync(async (req: Request, res: Response) => {
   const authUrl = googleCalendarService.generateAuthUrl();
-  // console.log('Initiating auth, redirecting to:', authUrl)
+  console.log('Initiating auth, redirecting to:', authUrl)
   res.redirect(authUrl);
 });
 
