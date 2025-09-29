@@ -8,19 +8,6 @@ export interface GoogleTokens {
   refresh_token_expires_in?: number;
 }
 
-// export interface AppointmentEventData {
-//   summary: string;
-//   description?: string;
-//   start: {
-//     dateTime: string;
-//     timeZone?: string;
-//   };
-//   end: {
-//     dateTime: string;
-//     timeZone?: string;
-//   };
-// }
-// appointment.interface.ts
 export interface AppointmentEventData {
   callLogId?: string | null;
   summary: string;
@@ -64,4 +51,5 @@ export interface GoogleCalendarServiceInterface {
   listCalendars(): Promise<CalendarListEntry[]>;
   listEvents(calendarId?: string, maxResults?: number): Promise<CalendarEvent[]>;
   getAuthClient(): any;
+  manualRefreshToken(): Promise<boolean>;
 }

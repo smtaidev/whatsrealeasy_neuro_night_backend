@@ -39,7 +39,7 @@ const saveTokens = async (tokens: GoogleTokens): Promise<User> => {
     data: {
       googleAccessToken: tokens.access_token,
       googleRefreshToken: tokens.refresh_token,
-      googleExpiryDate: BigInt(tokens.expiry_date),
+      googleExpiryDate: tokens.expiry_date ? BigInt(tokens.expiry_date) : null,
       googleScope: tokens.scope,
       updatedAt: new Date()
     }

@@ -4,7 +4,6 @@ import {
   AppointmentEventData,
   CalendarEvent,
   CalendarListEntry,
-  GoogleCalendarServiceInterface,
   GoogleTokens,
 } from "./appointment.interface";
 import { tokenService } from "../token/token.service";
@@ -12,7 +11,7 @@ import prisma from "../../utils/prisma";
 
 // State management
 let oAuth2Client: any = null;
-let calendar: calendar_v3.Calendar | null = null;
+let calendar: any = null;
 const calendarId: string = "primary";
 let currentAppointmentId: string | null = null;
 
@@ -66,7 +65,7 @@ const refreshAccessToken = async (): Promise<void> => {
       credentials.expiry_date
     );
 
-    oAuth2Client.setCredentials(credentials);
+    oAuth2Client.setCredentials(credentials as any);
     // console.log("Access token refreshed successfully");
   } catch (error) {
     console.error("Error refreshing access token:", error);
@@ -116,10 +115,10 @@ const setToken = async (code: string): Promise<GoogleTokens> => {
     oAuth2Client.setCredentials(tokens);
 
     // Save tokens to database
-    await tokenService.saveTokens(tokens);
+    await tokenService.saveTokens(tokens as GoogleTokens);
 
     console.log("Tokens saved to database successfully");
-    return tokens;
+    return tokens as GoogleTokens;
   } catch (error) {
     console.error("Error getting token:", (error as Error).message);
     throw error;
@@ -135,7 +134,7 @@ const setAppointment = async (
     // Ensure we have a valid token before making API call
     await ensureValidToken();
 
-    let response;
+    let response: any;
     const requestId = `appointment_${Date.now()}`;
 
     const conferenceData = {
@@ -146,7 +145,7 @@ const setAppointment = async (
     };
 
     // Fix: Ensure consistent dateTime format and proper timezone handling
-    const event: calendar_v3.Schema$Event = {
+    const event = {
       summary: eventData.summary,
       description: eventData.description || "",
       start: {
@@ -212,13 +211,13 @@ const setAppointment = async (
     };
 
     const result = await prisma.booking.create({
-      data: bookingData,
+      data: bookingData as any,
     });
 
     console.log("Booking saved to database:", result.id);
 
     currentAppointmentId = response.data.id || null;
-    return response.data;
+    return response.data as CalendarEvent;
   } catch (error) {
     console.error("Error setting appointment:", (error as Error).message);
     if ((error as any).response) {
@@ -245,7 +244,7 @@ const getAppointment = async (): Promise<
       eventId: currentAppointmentId,
     });
 
-    return response.data;
+    return response.data as CalendarEvent;
   } catch (error) {
     console.error("Error getting appointment:", (error as Error).message);
     if ((error as any).code === 404) {
@@ -295,7 +294,7 @@ const listCalendars = async (): Promise<CalendarListEntry[]> => {
     await ensureValidToken();
 
     const response = await calendar.calendarList.list({});
-    return response.data.items || [];
+    return (response.data.items || []) as CalendarListEntry[];
   } catch (error) {
     console.error("Error fetching calendars:", (error as Error).message);
     throw error;
@@ -318,7 +317,7 @@ const listEvents = async (
       singleEvents: true,
       orderBy: "startTime",
     });
-    return response.data.items || [];
+    return (response.data.items || []) as CalendarEvent[];
   } catch (error) {
     console.error("Error fetching events:", (error as Error).message);
     throw error;
