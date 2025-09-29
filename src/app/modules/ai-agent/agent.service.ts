@@ -1,6 +1,16 @@
+import {
+  IPaginationOptions,
+  paginationHelper,
+} from "../../utils/paginationHelpers";
 import prisma from "../../utils/prisma";
 
-const getAllAIAgents = async (filter: any) => {
+const getAllAIAgents = async (
+  options: IPaginationOptions,
+  filter: any = {}
+) => {
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(options);
+
   let whereClause: any = {};
 
   if (filter?.callType) {
@@ -12,18 +22,25 @@ const getAllAIAgents = async (filter: any) => {
 
   const result = await prisma.aIAgent.findMany({
     where: {
-      ...whereClause
+      ...whereClause,
     },
     include: {
-      service: true
+      service: true,
     },
+
+    orderBy: { [sortBy]: sortOrder },
+    skip: skip,
+    take: limit,
   });
 
   const total = await prisma.aIAgent.count({ where: whereClause });
 
   return {
     meta: {
+      page,
+      limit,
       total,
+      totalPages: Math.ceil(total / limit),
     },
     data: result,
   };
