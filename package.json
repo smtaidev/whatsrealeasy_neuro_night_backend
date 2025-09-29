@@ -7,11 +7,14 @@
     "name": "Sajjad hosen",
     "email": "mdshohansajjad@gmail.com"
   },
-  "scripts": {
+   "scripts": {
+    "postinstall": "npx prisma generate",
+    "start": "node ./dist/server.js",
+    "pm": "npx prisma migrate dev ",
+    "pg": "npx prisma generate",
+    "generate-module": "ts-node generate-module.ts",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
-    "ps": "npx prisma db push",
-    "start": "node dist/index.js"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

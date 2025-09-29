@@ -1,11 +1,31 @@
-FROM node:20
 
+# Use Node.js base image
+FROM node:22
+
+# Set working directory
 WORKDIR /app
 
+# Copy package.json and lock file
+COPY package*.json ./
+
+# Copy prisma folder before install (to run postinstall prisma generate)
+COPY prisma ./prisma
+
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy rest of the application
 COPY . .
 
-RUN npm install
+# Build TypeScript files
+RUN npm run build
 
-EXPOSE 3000
+# Expose the port your app runs on
+EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+
+# Run in dev mode using ts-node-dev
+# CMD ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/server.ts"]
+
+# # Start the app
+CMD ["npm", "run", "start"]

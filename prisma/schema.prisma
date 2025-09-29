@@ -61,13 +61,13 @@ model Booking {
 model Service {
   id                    String   @id @default(auto()) @map("_id") @db.ObjectId
   serviceName           String
-  voiceId               String
-  voiceName             String
-  phoneNumber           String
+  voiceId               String?
+  voiceName             String?
+  phoneNumber           String?
   requires_verification Boolean  @default(false)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
-  phone_number_id       String
+  phone_number_id       String?
 
   callLogs CallLog[]
   agents   AIAgent[]
