@@ -34,16 +34,16 @@ enum Role {
 }
 
 model Booking {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  callLogId String?  @db.ObjectId @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  callLogId String?  @unique @db.ObjectId
   callLog   CallLog? @relation(fields: [callLogId], references: [id])
 
   // Appointment details
   title       String
   description String?
-  startTime   DateTime
-  endTime     DateTime
-  timeZone    String?  @default("UTC")
+  startTime   DateTime?
+  endTime     DateTime?
+  timeZone    String?   @default("UTC")
 
   // Google Calendar integration
   googleEventId String? // store the event id (from Google Calendar API)
@@ -70,12 +70,13 @@ model Service {
   phone_number_id       String
 
   callLogs CallLog[]
+  agents   AIAgent[]
 
   @@map("services")
 }
 
 model CallLog {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   call_sid String?
   agent_id String
 
@@ -109,4 +110,19 @@ model CallLog {
   bookings Booking?
 
   @@map("AICallLog")
+}
+
+
+model AIAgent {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  agentId   String   // agent_8201k6bcnea2eacacnja5mtq6pde
+  callType  String?  // outbound, inbound, etc.
+  
+  serviceId String   @db.ObjectId
+  service   Service  @relation(fields: [serviceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("aiagents")
 }

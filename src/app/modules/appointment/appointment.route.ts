@@ -16,14 +16,14 @@ router.get("/redirect", GoogleCalendarController.handleOAuthCallback); // Google
 router.get("/auth/status", auth(Role.super_admin), GoogleCalendarController.getAuthStatus);
 
 // Calendar management
-router.get("/calendars", auth(Role.super_admin), GoogleCalendarController.listCalendars);
-router.get("/events", auth(Role.super_admin), GoogleCalendarController.listEvents);
+router.get("/calendars",  GoogleCalendarController.listCalendars);
+router.get("/events",  GoogleCalendarController.listEvents);
 
 // Appointment management
-router.post("/", auth(Role.super_admin), GoogleCalendarController.setAppointment);
-router.get("/", auth(Role.super_admin), GoogleCalendarController.getAppointment);
-router.delete("/", auth(Role.super_admin), GoogleCalendarController.cancelAppointment);
-router.patch("/clear", auth(Role.super_admin), GoogleCalendarController.clearAppointment);
+router.post("/",  GoogleCalendarController.setAppointment);
+router.get("/",  GoogleCalendarController.getAppointment);
+router.delete("/",  GoogleCalendarController.cancelAppointment);
+router.patch("/clear",  GoogleCalendarController.clearAppointment);
 
 export const appointmentRoutes = router;
 

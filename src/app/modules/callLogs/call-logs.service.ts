@@ -41,7 +41,7 @@ const getCallLogsManagement = async (
     ];
   }
 
-  console.log("Where Clause:", whereClause)
+  // console.log("Where Clause:", whereClause)
 
   // Add await here and use whereClause
   const result = await prisma.callLog.findMany({

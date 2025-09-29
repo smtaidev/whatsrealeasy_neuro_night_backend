@@ -4,6 +4,7 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { googleCalendarService } from './appointment.service';
 import { AppointmentEventData } from './appointment.interface';
+import config from '../../config';
 
 const redirectToGoogleAuth = catchAsync(async (req: Request, res: Response) => {
   console.log('Redirecting to Google OAuth')
@@ -19,17 +20,18 @@ const handleOAuthCallback = catchAsync(async (req: Request, res: Response) => {
   }
 
   const tokens = await googleCalendarService.setToken(code);
-  console.log("Tokens acquired:", tokens);
   
-  res.send(`
-    <html>
-      <body>
-        <h1>Authentication successful!</h1>
-        <p>You can now use the calendar API.</p>
-        <p><a href="/">Return to app</a></p>
-      </body>
-    </html>
-  `);
+  
+  // res.send(`
+  //   <html>
+  //     <body>
+  //       <h1>Authentication successful!</h1>
+  //       <p>You can now use the calendar API.</p>
+  //       <p><a href="/">Return to app</a></p>
+  //     </body>
+  //   </html>
+  // `);
+  res.redirect(`${config.url.frontend}/dashboard/super-admin/outbound/calender`); 
 });
 
 const getAuthStatus = catchAsync(async (req: Request, res: Response) => {
@@ -49,7 +51,12 @@ const getAuthStatus = catchAsync(async (req: Request, res: Response) => {
 const initiateAuth = catchAsync(async (req: Request, res: Response) => {
   const authUrl = googleCalendarService.generateAuthUrl();
   console.log('Initiating auth, redirecting to:', authUrl)
-  res.redirect(authUrl);
+  
+  res.json({
+    success: true,
+    url: authUrl,
+    message: "Google Auth URL generated successfully",
+  });
 });
 
 const handleRedirect = catchAsync(async (req: Request, res: Response) => {
