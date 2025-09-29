@@ -7,7 +7,7 @@ import status from "http-status";
 const getAllAIAgents = catchAsync(async (req: Request, res: Response) => {
 
 
-  const result = await AIAgentService.getAllAIAgents();
+  const result = await AIAgentService.getAllAIAgents(req?.query);
 
   sendResponse(res, {
     statusCode: status.OK,

@@ -1,38 +1,34 @@
 import prisma from "../../utils/prisma";
 
-const getAllAIAgents = async (
-) => {
+const getAllAIAgents = async (filter: any) => {
+  let whereClause: any = {};
 
-  let whereClause: any = {
-    callType: 'outbound'
-  };
+  if (filter?.callType) {
+    if (filter.callType !== "outbound" || filter.callType !== "inbound") {
+      throw new Error("Call type must be either 'outbound' or 'inbound'");
+    }
+    whereClause.callType = filter?.callType;
+  }
 
   const result = await prisma.aIAgent.findMany({
-    where: whereClause,
+    where: {
+      ...whereClause
+    },
     include: {
-      service: {
-        select: {
-          id: true,
-          serviceName: true,
-          voiceName: true,
-          phoneNumber: true,
-          requires_verification: true,
-          createdAt: true
-        }
-      }
-    }
+      service: true
+    },
   });
 
   const total = await prisma.aIAgent.count({ where: whereClause });
 
   return {
     meta: {
-      total
+      total,
     },
     data: result,
   };
 };
 
 export const AIAgentService = {
-    getAllAIAgents,
-}
+  getAllAIAgents,
+};
