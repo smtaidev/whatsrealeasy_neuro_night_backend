@@ -104,7 +104,7 @@ const listEvents = catchAsync(async (req: Request, res: Response) => {
 // appointment.controller.ts - Better validation
 const setAppointment = catchAsync(async (req: Request, res: Response) => {
   const { summary, description, start, end , callLogId} = req.body;
-  console.log('setAppointment called with:', req.body)
+  // console.log('setAppointment called with:', req.body)
   
   // Validate required fields
   if (!summary || !start || !end) {
