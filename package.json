@@ -13,7 +13,6 @@
     "start": "node dist/index.js"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
@@ -32,7 +31,7 @@
     "@prisma/client": "^6.9.0",
     "@types/nodemailer": "^6.4.17",
     "axios": "^1.10.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -47,5 +46,6 @@
     "stripe": "^18.2.1",
     "xlsx": "^0.18.5",
     "zod": "^3.24.4"
-  }
+  },
+  "packageManager": "pnpm@10.15.0+sha512.486ebc259d3e999a4e8691ce03b5cac4a71cbeca39372a9b762cb500cfdf0873e2cb16abe3d951b1ee2cf012503f027b98b6584e4df22524e0c7450d9ec7aa7b"
 }
