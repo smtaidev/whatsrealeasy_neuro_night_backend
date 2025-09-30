@@ -8,6 +8,7 @@ import {
 } from "./appointment.interface";
 import { tokenService } from "../token/token.service";
 import prisma from "../../utils/prisma";
+import config from "../../config";
 
 // State management
 let oAuth2Client: any = null;
@@ -80,7 +81,7 @@ const ensureValidToken = async (): Promise<void> => {
 };
 
 const generateAuthUrl = (): string => {
-  console.log("hitting")
+  console.log("hitting");
   if (!oAuth2Client) initializeOAuthClient();
 
   return oAuth2Client.generateAuthUrl({
@@ -134,6 +135,14 @@ const setAppointment = async (
     // Ensure we have a valid token before making API call
     await ensureValidToken();
 
+    // const user = await prisma.user.findFirst({
+    //   where: {
+    //     role: "super_admin",
+    //     isActive: true,
+    //   },
+    // });
+
+    // console.log(user);
     let response: any;
     const requestId = `appointment_${Date.now()}`;
 
@@ -156,6 +165,7 @@ const setAppointment = async (
         dateTime: eventData.end.dateTime,
         timeZone: eventData.end.timeZone || "UTC",
       },
+      attendees: [{ email: config.superAdmin.secondary_email || "" }],
       conferenceData: conferenceData,
       reminders: {
         useDefault: false,

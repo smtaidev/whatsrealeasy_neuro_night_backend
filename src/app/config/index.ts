@@ -28,6 +28,7 @@ export default {
   },
   superAdmin: {
     email: process.env.SUPER_ADMIN_EMAIL,
+    secondary_email: process.env.SECONDARY_EMAIL,
     password: process.env.SUPER_ADMIN_PASSWORD,
     name: process.env.SUPER_ADMIN_NAME,
   },
