@@ -114,7 +114,7 @@ const getDashbaordServices = async (
         completedCalls,
         conversations,
         totalBookings,
-        callType: callType || 'all', // Include callType in response for clarity
+        callType: callType || "all", // Include callType in response for clarity
       };
     })
   );
@@ -418,7 +418,6 @@ const getDashbaordServices = async (
 //   };
 // };
 
-
 // const getDashboardAnalytics = async (
 //   options: IPaginationOptions,
 //   filters: any = {}
@@ -503,7 +502,6 @@ const getDashbaordServices = async (
 //   // Build where clauses
 //   let callLogWhereClause: any = { ...dateFilter };
 //   let bookingWhereClause: any = { ...dateFilter };
-
 
 //   // Execute all queries in parallel for better performance
 //   const [
@@ -605,7 +603,7 @@ const getDashbaordServices = async (
 //   // Process monthly trends and top services
 //   const monthlyData = Array.from({ length: 12 }, (_, monthIndex) => {
 //     const monthName = new Date(currentYear, monthIndex).toLocaleString('en-US', { month: 'short' });
-    
+
 //     // Filter bookings for this month
 //     const monthBookings = allBookingsForTrends.filter(booking => {
 //       return new Date(booking.createdAt).getMonth() === monthIndex;
@@ -613,12 +611,12 @@ const getDashbaordServices = async (
 
 //     // Calculate service counts for this month
 //     const serviceCounts: { [key: string]: { serviceName: string; count: number } } = {};
-    
+
 //     monthBookings.forEach(booking => {
 //       if (booking.callLog?.service) {
 //         const serviceId = booking.callLog.service.id;
 //         const serviceName = booking.callLog.service.serviceName;
-        
+
 //         if (!serviceCounts[serviceId]) {
 //           serviceCounts[serviceId] = { serviceName, count: 0 };
 //         }
@@ -680,7 +678,6 @@ const getDashboardAnalytics = async (
   options: IPaginationOptions,
   filters: any = {}
 ) => {
-
   // Define call status constants
   const CALL_STATUS = {
     COMPLETED: "completed",
@@ -760,22 +757,21 @@ const getDashboardAnalytics = async (
       break;
   }
 
-
   // Add callType filter if provided
   const callTypeWhereClause = callType ? { callType } : {};
 
   // Build where clauses with callType filter
-  let callLogWhereClause: any = { 
+  let callLogWhereClause: any = {
     ...dateFilter,
-    ...callTypeWhereClause 
+    ...callTypeWhereClause,
   };
-  
+
   let bookingWhereClause: any = { ...dateFilter };
 
   // For bookings, we need to filter by callType through the callLog relation
   let bookingCallLogWhereClause: any = {
     ...dateFilter,
-    ...callTypeWhereClause
+    ...callTypeWhereClause,
   };
 
   // Execute all queries in parallel for better performance
@@ -787,21 +783,26 @@ const getDashboardAnalytics = async (
     totalAppointments,
     totalConfirmedMeetings,
     totalUpcomingAppointments,
-    allBookingsForTrends
+    allBookingsForTrends,
   ] = await Promise.all([
     // Call analytics
     prisma.callLog.count({ where: callLogWhereClause }),
     prisma.callLog.count({
-      where: { 
-        ...callLogWhereClause, 
-        call_status: CALL_STATUS.COMPLETED 
+      where: {
+        ...callLogWhereClause,
+        call_status: CALL_STATUS.COMPLETED,
       },
     }),
     prisma.callLog.count({
       where: {
         ...callLogWhereClause,
         call_status: {
-          in: [CALL_STATUS.CANCELED, CALL_STATUS.NO_ANSWER, CALL_STATUS.BUSY, CALL_STATUS.FAILED],
+          in: [
+            CALL_STATUS.CANCELED,
+            CALL_STATUS.NO_ANSWER,
+            CALL_STATUS.BUSY,
+            CALL_STATUS.FAILED,
+          ],
         },
       },
     }),
@@ -809,27 +810,35 @@ const getDashboardAnalytics = async (
       where: {
         ...callLogWhereClause,
         call_status: {
-          in: [CALL_STATUS.IN_PROGRESS, CALL_STATUS.RINGING, CALL_STATUS.INITIATED],
+          in: [
+            CALL_STATUS.IN_PROGRESS,
+            CALL_STATUS.RINGING,
+            CALL_STATUS.INITIATED,
+          ],
         },
       },
     }),
 
     // Booking analytics - filter by callType through callLog relation
-    prisma.booking.count({ 
+    prisma.booking.count({
       where: {
         ...bookingWhereClause,
-        callLog: bookingCallLogWhereClause ? {
-          ...bookingCallLogWhereClause
-        } : undefined
-      }
+        callLog: bookingCallLogWhereClause
+          ? {
+              ...bookingCallLogWhereClause,
+            }
+          : undefined,
+      },
     }),
     prisma.booking.count({
-      where: { 
-        ...bookingWhereClause, 
+      where: {
+        ...bookingWhereClause,
         status: "confirmed",
-        callLog: bookingCallLogWhereClause ? {
-          ...bookingCallLogWhereClause
-        } : undefined
+        callLog: bookingCallLogWhereClause
+          ? {
+              ...bookingCallLogWhereClause,
+            }
+          : undefined,
       },
     }),
     prisma.booking.count({
@@ -837,9 +846,11 @@ const getDashboardAnalytics = async (
         ...bookingWhereClause,
         startTime: { gt: new Date() },
         status: { in: ["confirmed", "cancelled", "tentative"] },
-        callLog: bookingCallLogWhereClause ? {
-          ...bookingCallLogWhereClause
-        } : undefined
+        callLog: bookingCallLogWhereClause
+          ? {
+              ...bookingCallLogWhereClause,
+            }
+          : undefined,
       },
     }),
 
@@ -851,8 +862,8 @@ const getDashboardAnalytics = async (
           lte: new Date(currentYear, 11, 31, 23, 59, 59, 999),
         },
         ...(callType && {
-          callLog: bookingCallLogWhereClause
-        })
+          callLog: bookingCallLogWhereClause,
+        }),
       },
       include: {
         callLog: {
@@ -866,7 +877,7 @@ const getDashboardAnalytics = async (
           },
         },
       },
-    })
+    }),
   ]);
 
   // Calculate average appointment duration with callType filter
@@ -876,8 +887,8 @@ const getDashboardAnalytics = async (
       startTime: { not: null },
       endTime: { not: null },
       ...(callType && {
-        callLog: bookingCallLogWhereClause
-      })
+        callLog: bookingCallLogWhereClause,
+      }),
     },
     select: {
       startTime: true,
@@ -885,38 +896,72 @@ const getDashboardAnalytics = async (
     },
   });
 
+  // const totalAppointmentDuration = appointmentsWithDuration.reduce(
+  //   (total, appointment) => {
+  //     if (appointment.startTime && appointment.endTime) {
+  //       const duration = new Date(appointment.endTime).getTime() - new Date(appointment.startTime).getTime();
+  //       return total + duration;
+  //     }
+  //     return total;
+  //   },
+  //   0
+  // );
+
+  // const avgAppointmentTime = appointmentsWithDuration.length > 0
+  //   ? totalAppointmentDuration / appointmentsWithDuration.length
+  //   : 0;
   const totalAppointmentDuration = appointmentsWithDuration.reduce(
     (total, appointment) => {
       if (appointment.startTime && appointment.endTime) {
-        const duration = new Date(appointment.endTime).getTime() - new Date(appointment.startTime).getTime();
+        const duration =
+          new Date(appointment.endTime).getTime() -
+          new Date(appointment.startTime).getTime();
         return total + duration;
       }
       return total;
     },
     0
   );
+  // console.log("totalAppointmentDuration:", totalAppointmentDuration);
+  // console.log(
+  //   "appointmentsWithDuration.length:",
+  //   appointmentsWithDuration.length
+  // );
+  const avgAppointmentTime =
+    appointmentsWithDuration.length > 0
+      ? totalAppointmentDuration / appointmentsWithDuration.length
+      : 0;
 
-  const avgAppointmentTime = appointmentsWithDuration.length > 0
-    ? totalAppointmentDuration / appointmentsWithDuration.length
-    : 0;
+  // Convert to hours and minutes properly
+  const avgDurationInMinutes = Math.floor(avgAppointmentTime / (1000 * 60));
+  // console.log("avgDurationInMinutes:", avgDurationInMinutes);
+  // const hours = Math.floor(avgDurationInMinutes / 60);
+  // const minutes = avgDurationInMinutes % 60;
+
+  // const avgAppointmentTimeFormatted = `${hours}h ${minutes}m`;
 
   // Process monthly trends and top services
   const monthlyData = Array.from({ length: 12 }, (_, monthIndex) => {
-    const monthName = new Date(currentYear, monthIndex).toLocaleString('en-US', { month: 'short' });
-    
+    const monthName = new Date(currentYear, monthIndex).toLocaleString(
+      "en-US",
+      { month: "short" }
+    );
+
     // Filter bookings for this month
-    const monthBookings = allBookingsForTrends.filter(booking => {
+    const monthBookings = allBookingsForTrends.filter((booking) => {
       return new Date(booking.createdAt).getMonth() === monthIndex;
     });
 
     // Calculate service counts for this month
-    const serviceCounts: { [key: string]: { serviceName: string; count: number } } = {};
-    
-    monthBookings.forEach(booking => {
+    const serviceCounts: {
+      [key: string]: { serviceName: string; count: number };
+    } = {};
+
+    monthBookings.forEach((booking) => {
       if (booking.callLog?.service) {
         const serviceId = booking.callLog.service.id;
         const serviceName = booking.callLog.service.serviceName;
-        
+
         if (!serviceCounts[serviceId]) {
           serviceCounts[serviceId] = { serviceName, count: 0 };
         }
@@ -928,7 +973,7 @@ const getDashboardAnalytics = async (
     const topServiceNames = Object.values(serviceCounts)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
-      .map(service => service.serviceName);
+      .map((service) => service.serviceName);
 
     return {
       month: monthName,
@@ -938,7 +983,7 @@ const getDashboardAnalytics = async (
   });
 
   // Calculate Y-axis range for chart
-  const allBookingCounts = monthlyData.map(month => month.bookings);
+  const allBookingCounts = monthlyData.map((month) => month.bookings);
   const maxBookings = Math.max(...allBookingCounts);
   const minBookings = Math.min(...allBookingCounts);
   const yAxisPadding = Math.max(1, Math.ceil(maxBookings * 0.1));
@@ -952,16 +997,20 @@ const getDashboardAnalytics = async (
         success: totalSuccessCalls,
         drop: totalDropCalls,
         waiting: totalWaitingCalls,
-        successRate: totalCalls > 0 ? (totalSuccessCalls / totalCalls) * 100 : 0,
-        callType: callType || 'all', // Include callType in response
+        successRate:
+          totalCalls > 0 ? (totalSuccessCalls / totalCalls) * 100 : 0,
+        callType: callType || "all", // Include callType in response
       },
       appointments: {
         total: totalAppointments,
         confirmed: totalConfirmedMeetings,
         upcoming: totalUpcomingAppointments,
-        confirmationRate: totalAppointments > 0 ? (totalConfirmedMeetings / totalAppointments) * 100 : 0,
+        confirmationRate:
+          totalAppointments > 0
+            ? (totalConfirmedMeetings / totalAppointments) * 100
+            : 0,
       },
-      averageAppointmentTime: avgAppointmentTime,
+      averageAppointmentTime: avgDurationInMinutes,
     },
     // Combined monthly data with top services
     monthlyTrends: monthlyData,
@@ -973,9 +1022,9 @@ const getDashboardAnalytics = async (
       },
     },
     filters: {
-      timeRange: filters.timeRange || 'all',
-      callType: callType || 'all',
-    }
+      timeRange: filters.timeRange || "all",
+      callType: callType || "all",
+    },
   };
 };
 export const AnalyticsService = {
