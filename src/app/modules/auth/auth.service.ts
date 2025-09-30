@@ -221,7 +221,6 @@ const resetPassword = async (
     },
   });
 
-  console.log(result)
 
   const { password, ...others } = result;
   return others;

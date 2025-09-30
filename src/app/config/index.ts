@@ -28,7 +28,9 @@ export default {
   },
   superAdmin: {
     email: process.env.SUPER_ADMIN_EMAIL,
+    secondary_email: process.env.SECONDARY_EMAIL,
     password: process.env.SUPER_ADMIN_PASSWORD,
+    name: process.env.SUPER_ADMIN_NAME,
   },
   url: {
     image: process.env.IMAGE_URL,
@@ -44,5 +46,14 @@ export default {
     cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
     cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+  },
+
+  // process.env.CLIENT_ID,
+  // process.env.SECRET_ID,
+  // process.env.REDIRECT
+  calendar: {
+    client_id: process.env.CLIENT_ID,
+    secret_id: process.env.SECRET_ID,
+    redirect: process.env.REDIRECT,
   }
 };
