@@ -6,18 +6,18 @@ import prisma from "../../utils/prisma";
 
 const getAllAIAgents = async (
   options: IPaginationOptions,
-  filter: any = {}
+  callType?: string,
 ) => {
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(options);
 
   let whereClause: any = {};
 
-  if (filter?.callType) {
-    if (filter.callType !== "outbound" || filter.callType !== "inbound") {
-      throw new Error("Call type must be either 'outbound' or 'inbound'");
-    }
-    whereClause.callType = filter?.callType;
+  if (callType) {
+    // if (filter.callType !== "outbound" || filter.callType !== "inbound") {
+    //   throw new Error("Call type must be either 'outbound' or 'inbound'");
+    // }
+    whereClause.callType = callType;
   }
 
   const result = await prisma.aIAgent.findMany({
