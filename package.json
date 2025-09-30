@@ -7,7 +7,7 @@
     "name": "Sajjad hosen",
     "email": "mdshohansajjad@gmail.com"
   },
-   "scripts": {
+  "scripts": {
     "postinstall": "npx prisma generate",
     "start": "node ./dist/server.js",
     "pm": "npx prisma migrate dev ",
@@ -47,10 +47,7 @@
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.2",
-    "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.3",
-    "stripe": "^18.2.1",
-    "xlsx": "^0.18.5",
     "zod": "^3.24.4"
   }
 }
