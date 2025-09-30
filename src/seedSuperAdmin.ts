@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export const seedSuperAdmin = async () => {
   const email = config.superAdmin.email as string;
   const password = config.superAdmin.password as string;
+  const name = config.superAdmin.name as string;
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -21,7 +22,7 @@ export const seedSuperAdmin = async () => {
 
   await prisma.user.create({
     data: {
-      name: "Super Admin",
+      name,
       email,
       password: hashedPassword,
       role: Role.super_admin,
