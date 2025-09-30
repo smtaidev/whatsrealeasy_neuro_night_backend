@@ -11,14 +11,16 @@ const getCallLogsManagement = async (
 ) => {
   let searchTerm = filters?.searchTerm as string;
   const call_Status = filters?.call_status as string;
-  const callType = (filters?.callType as string) || "outgoing";
+  const callType = filters?.callType as string;
 
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(options);
 
-  let whereClause: any = {
-    callType: callType,
-  };
+  let whereClause: any = {};
+
+  if (callType) {
+    whereClause.callType = callType;
+  }
 
   if (call_Status) {
     whereClause.call_status = call_Status;
@@ -94,7 +96,6 @@ const getCallLogsManagement = async (
     skip: skip,
     take: limit,
   });
-
 
   const total = await prisma.callLog.count({ where: whereClause });
 

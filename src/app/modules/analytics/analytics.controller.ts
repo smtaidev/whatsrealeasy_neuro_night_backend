@@ -16,7 +16,7 @@ const getDashbaordAnalytics = catchAsync(async (req, res) => {
   const filters = pickOptions(req.query, [
     "bookingStatus",
     "serviceId",
-    "callType",
+    "callType", // 'outgoing', 'incoming'
     "timeRange",
     "call_status",
     "startDate",
@@ -30,6 +30,7 @@ const getDashbaordAnalytics = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
 const getDashbaordServices = catchAsync(async (req, res) => {
   const options = pickOptions(req.query, [
     "limit",
@@ -41,6 +42,7 @@ const getDashbaordServices = catchAsync(async (req, res) => {
   const filters = pickOptions(req.query, [
     "timePeriod", // '1month', '6month', '1year'
     "metric", // 'booking', 'conversation'
+    "callType" // 'incoming', 'outgoing'
   ]);
 
   const result = await AnalyticsService.getDashbaordServices(options, filters);
