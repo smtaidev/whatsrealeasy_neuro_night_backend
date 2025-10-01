@@ -8,10 +8,18 @@ export default {
   port: process.env.PORT || 5005,
   host: process.env.HOST || "localhost",
   databaseUrl: process.env.DATABASE_URL,
+  // sendEmail: {
+  //   email_from: process.env.EMAIL_FROM,
+  //   brevo_pass: process.env.BREVO_PASS,
+  //   brevo_email: process.env.BREVO_EMAIL,
+  // },
   sendEmail: {
     email_from: process.env.EMAIL_FROM,
-    brevo_pass: process.env.BREVO_PASS,
-    brevo_email: process.env.BREVO_EMAIL,
+    user: process.env.EMAIL_USER, // can be brevo_email or gmail
+    pass: process.env.EMAIL_PASS, // can be brevo_pass or gmail app pass
+    host: process.env.EMAIL_HOST, // e.g. smtp-relay.brevo.com / smtp.gmail.com
+    port: Number(process.env.EMAIL_PORT) || 465,
+    secure: process.env.EMAIL_SECURE === "true", // true/false from env
   },
   jwt: {
     access: {
@@ -55,5 +63,5 @@ export default {
     client_id: process.env.CLIENT_ID,
     secret_id: process.env.SECRET_ID,
     redirect: process.env.REDIRECT,
-  }
+  },
 };
