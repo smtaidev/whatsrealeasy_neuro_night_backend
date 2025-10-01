@@ -101,6 +101,7 @@ model CallLog {
 
   // Additional fields
   name           String?
+  email          String?
   contact_number String?
   company        String?
   meeting_time   String?
@@ -112,15 +113,14 @@ model CallLog {
   @@map("AICallLog")
 }
 
-
 model AIAgent {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  agentId   String   // agent_8201k6bcnea2eacacnja5mtq6pde
-  callType  String?  // outbound, inbound, etc.
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  agentId       String // agent_8201k6bcnea2eacacnja5mtq6pde
+  callType      String? // outbound, inbound, etc.
   first_message String?
-  
-  serviceId String   @db.ObjectId
-  service   Service  @relation(fields: [serviceId], references: [id])
+
+  serviceId String  @db.ObjectId
+  service   Service @relation(fields: [serviceId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
