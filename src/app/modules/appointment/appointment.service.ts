@@ -250,7 +250,7 @@ const manualRefreshToken = async (): Promise<boolean> => {
   }
 };
 
-// ✅ NEW: Get user email from tokens
+// NEW: Get user email from tokens
 const getUserEmail = async (): Promise<string | null> => {
   try {
     if (!oAuth2Client) initializeOAuthClient();
