@@ -8,7 +8,7 @@ const router = Router();
 
 // ==================== PUBLIC ROUTES (OAuth Flow) ====================
 // These are for the initial Google OAuth authentication
-router.get("/auth/initiate", GoogleCalendarController.initiateAuth); // Start OAuth flow
+router.get("/auth/initiate",auth(Role.super_admin), GoogleCalendarController.initiateAuth); // Start OAuth flow
 router.get("/redirect", GoogleCalendarController.handleOAuthCallback); // Google redirects here
 
 // ==================== PROTECTED ROUTES (Require Super Admin) ====================
