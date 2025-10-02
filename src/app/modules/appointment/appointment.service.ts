@@ -388,12 +388,34 @@ let calendar: any = null;
 const calendarId: string = "primary";
 
 // Initialize the service
+// const initializeOAuthClient = (): void => {
+//   oAuth2Client = new google.auth.OAuth2(
+//     process.env.CLIENT_ID!,
+//     process.env.SECRET_ID!,
+//     process.env.REDIRECT!
+//   );
+
+//   calendar = google.calendar({ version: "v3", auth: oAuth2Client });
+
+//   // Load tokens from database on initialization
+//   loadTokensFromDB();
+// };
 const initializeOAuthClient = (): void => {
   oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID!,
     process.env.SECRET_ID!,
     process.env.REDIRECT!
   );
+
+  // Set scopes explicitly
+  oAuth2Client.setCredentials({
+    scope: [
+      'https://www.googleapis.com/auth/calendar.readonly',
+      'https://www.googleapis.com/auth/calendar.events',
+      'openid',
+      'email'
+    ]
+  });
 
   calendar = google.calendar({ version: "v3", auth: oAuth2Client });
 
@@ -459,6 +481,8 @@ const generateAuthUrl = (): string => {
     scope: [
       "https://www.googleapis.com/auth/calendar.readonly",
       "https://www.googleapis.com/auth/calendar.events",
+      "openid",
+      "email",
     ],
     prompt: "consent",
   });
@@ -483,6 +507,7 @@ const setToken = async (code: string): Promise<GoogleTokens> => {
     if (!oAuth2Client) initializeOAuthClient();
 
     const { tokens } = await oAuth2Client.getToken(code);
+    console.log("tokens", tokens)
     oAuth2Client.setCredentials(tokens);
 
     // Save tokens to database
@@ -651,8 +676,6 @@ const cancelAppointment = async (
 const clearAppointment = (): { message: string } => {
   return { message: "Appointment reference cleared (deprecated)" };
 };
-
-
 
 const getAuthClient = (): any => {
   if (!oAuth2Client) initializeOAuthClient();

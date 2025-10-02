@@ -1,5 +1,5 @@
 // token.service.ts
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -18,9 +18,9 @@ export interface GoogleTokens {
 const getSuperAdmin = async (): Promise<User | null> => {
   return await prisma.user.findFirst({
     where: {
-      role: 'super_admin',
-      isActive: true
-    }
+      role: "super_admin",
+      isActive: true,
+    },
   });
 };
 
@@ -29,9 +29,9 @@ const getSuperAdmin = async (): Promise<User | null> => {
  */
 const saveTokens = async (tokens: GoogleTokens): Promise<User> => {
   const superAdmin = await getSuperAdmin();
-  
+
   if (!superAdmin) {
-    throw new Error('No active Super Admin found');
+    throw new Error("No active Super Admin found");
   }
 
   return await prisma.user.update({
@@ -41,8 +41,8 @@ const saveTokens = async (tokens: GoogleTokens): Promise<User> => {
       googleRefreshToken: tokens.refresh_token,
       googleExpiryDate: tokens.expiry_date ? BigInt(tokens.expiry_date) : null,
       googleScope: tokens.scope,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 };
 
@@ -51,17 +51,22 @@ const saveTokens = async (tokens: GoogleTokens): Promise<User> => {
  */
 const getTokens = async (): Promise<GoogleTokens | null> => {
   const superAdmin = await getSuperAdmin();
-  
-  if (!superAdmin || !superAdmin.googleAccessToken || !superAdmin.googleRefreshToken || !superAdmin.googleExpiryDate) {
+
+  if (
+    !superAdmin ||
+    !superAdmin.googleAccessToken ||
+    !superAdmin.googleRefreshToken ||
+    !superAdmin.googleExpiryDate
+  ) {
     return null;
   }
 
   return {
     access_token: superAdmin.googleAccessToken,
     refresh_token: superAdmin.googleRefreshToken,
-    scope: superAdmin.googleScope || '',
-    token_type: 'Bearer',
-    expiry_date: Number(superAdmin.googleExpiryDate)
+    scope: superAdmin.googleScope || "",
+    token_type: "Bearer",
+    expiry_date: Number(superAdmin.googleExpiryDate),
   };
 };
 
@@ -71,18 +76,21 @@ const getTokens = async (): Promise<GoogleTokens | null> => {
 const isTokenExpired = async (): Promise<boolean> => {
   const tokens = await getTokens();
   if (!tokens) return true;
-  
+
   return Date.now() > tokens.expiry_date;
 };
 
 /**
  * Update access token (after refresh)
  */
-const updateAccessToken = async (accessToken: string, expiryDate: number): Promise<User> => {
+const updateAccessToken = async (
+  accessToken: string,
+  expiryDate: number
+): Promise<User> => {
   const superAdmin = await getSuperAdmin();
-  
+
   if (!superAdmin) {
-    throw new Error('No active Super Admin found');
+    throw new Error("No active Super Admin found");
   }
 
   return await prisma.user.update({
@@ -90,8 +98,8 @@ const updateAccessToken = async (accessToken: string, expiryDate: number): Promi
     data: {
       googleAccessToken: accessToken,
       googleExpiryDate: BigInt(expiryDate),
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 };
 
@@ -100,9 +108,9 @@ const updateAccessToken = async (accessToken: string, expiryDate: number): Promi
  */
 const clearTokens = async (): Promise<User> => {
   const superAdmin = await getSuperAdmin();
-  
+
   if (!superAdmin) {
-    throw new Error('No active Super Admin found');
+    throw new Error("No active Super Admin found");
   }
 
   return await prisma.user.update({
@@ -112,8 +120,8 @@ const clearTokens = async (): Promise<User> => {
       googleRefreshToken: null,
       googleExpiryDate: null,
       googleScope: null,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 };
 
@@ -124,5 +132,5 @@ export const tokenService = {
   getTokens,
   isTokenExpired,
   updateAccessToken,
-  clearTokens
+  clearTokens,
 };
