@@ -13,20 +13,20 @@ router.get("/redirect", GoogleCalendarController.handleOAuthCallback); // Google
 
 // ==================== PROTECTED ROUTES (Require Super Admin) ====================
 // Authentication status check
-router.get("/auth/status", auth(Role.super_admin), GoogleCalendarController.getAuthStatus);
+router.get("/auth/status", auth(Role.super_admin , Role.admin), GoogleCalendarController.getAuthStatus);
 
-// Calendar management
-router.get("/calendars",  GoogleCalendarController.listCalendars);
-router.get("/events",  GoogleCalendarController.listEvents);
 
 // Appointment management
 router.post("/",  GoogleCalendarController.setAppointment);
-router.get("/",  GoogleCalendarController.getAppointment);
-router.delete("/",  GoogleCalendarController.cancelAppointment);
-router.patch("/clear",  GoogleCalendarController.clearAppointment);
 
 export const appointmentRoutes = router;
 
+// // Calendar management
+// router.patch("/clear",  GoogleCalendarController.clearAppointment);
+// router.get("/calendars",  GoogleCalendarController.listCalendars);
+// router.get("/events",  GoogleCalendarController.listEvents);
+// router.get("/",  GoogleCalendarController.getAppointment);
+// router.delete("/",  GoogleCalendarController.cancelAppointment);
 
 // http://localhost:5000/api/v1/appointments/auth/initiate
 // http://localhost:5000/api/v1/appointments/redirect

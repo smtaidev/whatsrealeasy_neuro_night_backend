@@ -20,17 +20,7 @@ const handleOAuthCallback = catchAsync(async (req: Request, res: Response) => {
   }
 
   const tokens = await googleCalendarService.setToken(code);
-  
-  
-  // res.send(`
-  //   <html>
-  //     <body>
-  //       <h1>Authentication successful!</h1>
-  //       <p>You can now use the calendar API.</p>
-  //       <p><a href="/">Return to app</a></p>
-  //     </body>
-  //   </html>
-  // `);
+
   res.redirect(`${config.url.frontend}/dashboard/super-admin/outbound/calender`); 
 });
 
@@ -78,28 +68,6 @@ const handleRedirect = catchAsync(async (req: Request, res: Response) => {
   `);
 });
 
-const listCalendars = catchAsync(async (req: Request, res: Response) => {
-  const calendars = await googleCalendarService.listCalendars();
-  
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: "Calendars retrieved successfully",
-    data: calendars,
-  });
-});
-
-const listEvents = catchAsync(async (req: Request, res: Response) => {
-  const calendarId = (req.query.calendar as string) || 'primary';
-  const maxResults = parseInt(req.query.maxResults as string) || 15;
-  
-  const events = await googleCalendarService.listEvents(calendarId, maxResults);
-  
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: "Events retrieved successfully",
-    data: events,
-  });
-});
 
 // appointment.controller.ts - Better validation
 const setAppointment = catchAsync(async (req: Request, res: Response) => {
@@ -164,71 +132,8 @@ const setAppointment = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
-// const setAppointment = catchAsync(async (req: Request, res: Response) => {
-//   const { summary, description, start, end, timeZone } = req.body;
-  
-//   // Validate required fields
-//   if (!summary || !start || !end) {
-//     return res.status(status.BAD_REQUEST).json({ 
-//       error: 'Missing required fields: summary, start, end' 
-//     });
-//   }
 
-//   const eventData: AppointmentEventData = {
-//     summary,
-//     description,
-//     start: {
-//       dateTime: start,
-//       timeZone: timeZone || 'UTC'
-//     },
-//     end: {
-//       dateTime: end,
-//       timeZone: timeZone || 'UTC'
-//     }
-//   };
 
-//   const result = await googleCalendarService.setAppointment(eventData);
-  
-//   sendResponse(res, {
-//     statusCode: status.OK,
-//     message: "Appointment set successfully",
-//     data: {
-//       message: result.id ? 'Appointment created' : 'Appointment updated',
-//       appointment: result,
-//       meetLink: result.hangoutLink
-//     },
-//   });
-// });
-
-const getAppointment = catchAsync(async (req: Request, res: Response) => {
-  const result = await googleCalendarService.getAppointment();
-  
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: "Appointment retrieved successfully",
-    data: result,
-  });
-});
-
-const cancelAppointment = catchAsync(async (req: Request, res: Response) => {
-  const result = await googleCalendarService.cancelAppointment();
-  
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: "Appointment cancelled successfully",
-    data: result,
-  });
-});
-
-const clearAppointment = catchAsync(async (req: Request, res: Response) => {
-  const result = googleCalendarService.clearAppointment();
-  
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: "Appointment cleared successfully",
-    data: result,
-  });
-});
 
 export const GoogleCalendarController = {
   redirectToGoogleAuth,
@@ -236,10 +141,5 @@ export const GoogleCalendarController = {
   getAuthStatus,
   initiateAuth,
   handleRedirect,
-  listCalendars,
-  listEvents,
-  setAppointment,
-  getAppointment,
-  cancelAppointment,
-  clearAppointment,
+  setAppointment
 };
