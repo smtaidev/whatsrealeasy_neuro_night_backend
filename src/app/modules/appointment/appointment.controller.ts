@@ -5,7 +5,7 @@ import status from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { googleCalendarService } from "./appointment.service";
-import { AppointmentEventData } from "./appointment.interface";
+import { AppointmentEventData, GoogleTokens } from "./appointment.interface";
 import config from "../../config";
 import { google } from "googleapis";
 import { tokenService } from "../token/token.service";
@@ -14,79 +14,147 @@ const AUTHORIZED_EMAILS = [
   config.superAdmin.email,
 ];
 
+// const handleOAuthCallback = catchAsync(async (req: Request, res: Response) => {
+//   const code = req.query.code as string;
+  
+//   if (!code) {
+//     return res.status(status.BAD_REQUEST).send("No authorization code provided");
+//   }
+
+//   try {
+//     // Step 1: Exchange code for tokens
+//     const tokens = await googleCalendarService.setToken(code);
+    
+//     // Step 2: Set credentials
+//     const oauth2Client = googleCalendarService.getAuthClient();
+//     oauth2Client.setCredentials(tokens);
+
+//     // Step 3: Get user info with proper error handling
+//     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+    
+//     let email: string;
+//     try {
+//       const {data} = await oauth2.userinfo.get();
+
+     
+//       if (!data.email) {
+//         console.error("No email in userinfo response:", data);
+//         await tokenService.clearTokens();
+//         return res.redirect(
+//           `${config.url.frontend}/dashboard/super-admin/outbound/calender?error=no_email`
+//         );
+//       }
+      
+//       email = data.email;
+//       console.log("Successfully retrieved user email:", email);
+      
+//     } catch (userInfoError: any) {
+//       console.error("Error fetching user info:", userInfoError);
+//       console.error("Error response:", userInfoError.response?.data);
+      
+//       await tokenService.clearTokens();
+//       return res.redirect(
+//         `${config.url.frontend}/dashboard/super-admin/outbound/calender?error=userinfo_failed`
+//       );
+//     }
+
+//     // Step 4: Check authorization
+//     if (!AUTHORIZED_EMAILS.includes(email)) {
+//       console.log(`Unauthorized email attempted access: ${email}`);
+//       await tokenService.clearTokens();
+//       return res.redirect(
+//         `${config.url.frontend}/dashboard/super-admin/outbound/calender?error=unauthorized&email=${encodeURIComponent(email)}`
+//       );
+//     }
+
+//     // Step 5: Success - redirect with success flag
+//     // console.log(`Authorized email successfully authenticated: ${email}`);
+//     return res.redirect(
+//       `${config.url.frontend}/dashboard/super-admin/outbound/calender?success=true&email=${encodeURIComponent(email)}`
+//     );
+    
+//   } catch (error: any) {
+//     console.error("OAuth callback error:", error);
+//     console.error("Error stack:", error.stack);
+    
+//     return res.status(status.INTERNAL_SERVER_ERROR).send(
+//       `Authentication failed: ${error.message}`
+//     );
+//   }
+// });
+
 const handleOAuthCallback = catchAsync(async (req: Request, res: Response) => {
   const code = req.query.code as string;
-  
+ 
   if (!code) {
     return res.status(status.BAD_REQUEST).send("No authorization code provided");
   }
 
   try {
-    // Step 1: Exchange code for tokens
-    const tokens = await googleCalendarService.setToken(code);
-    
-    // Step 2: Set credentials
+    // Step 1: Get auth client and exchange code for tokens (but don't save yet)
     const oauth2Client = googleCalendarService.getAuthClient();
+    const { tokens } = await oauth2Client.getToken(code);
+    
+    // Step 2: Temporarily set credentials to fetch user info
     oauth2Client.setCredentials(tokens);
-
-    // Step 3: Get user info with proper error handling
+    
+    // Step 3: Get and validate user info BEFORE saving tokens
     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
     
     let email: string;
     try {
-      const {data} = await oauth2.userinfo.get();
-
+      const { data } = await oauth2.userinfo.get();
      
       if (!data.email) {
         console.error("No email in userinfo response:", data);
-        await tokenService.clearTokens();
         return res.redirect(
           `${config.url.frontend}/dashboard/super-admin/outbound/calender?error=no_email`
         );
       }
-      
+     
       email = data.email;
-      console.log("Successfully retrieved user email:", email);
-      
+      // console.log("Successfully retrieved user email:", email);
+     
     } catch (userInfoError: any) {
       console.error("Error fetching user info:", userInfoError);
       console.error("Error response:", userInfoError.response?.data);
-      
-      await tokenService.clearTokens();
+     
       return res.redirect(
         `${config.url.frontend}/dashboard/super-admin/outbound/calender?error=userinfo_failed`
       );
     }
 
-    // Step 4: Check authorization
+    // Step 4: Check authorization BEFORE saving tokens
     if (!AUTHORIZED_EMAILS.includes(email)) {
-      console.log(`Unauthorized email attempted access: ${email}`);
-      await tokenService.clearTokens();
+      // console.log(`Unauthorized email attempted access: ${email}`);
+      // Don't clear tokens - they were never saved
       return res.redirect(
         `${config.url.frontend}/dashboard/super-admin/outbound/calender?error=unauthorized&email=${encodeURIComponent(email)}`
       );
     }
 
-    // Step 5: Success - redirect with success flag
-    // console.log(`Authorized email successfully authenticated: ${email}`);
+    // Step 5: Email is authorized - NOW save tokens to database
+    await tokenService.saveTokens(tokens as GoogleTokens);
+    console.log(`Authorized email successfully authenticated and tokens saved: ${email}`);
+    
+    // Step 6: Success - redirect with success flag
     return res.redirect(
       `${config.url.frontend}/dashboard/super-admin/outbound/calender?success=true&email=${encodeURIComponent(email)}`
     );
-    
+   
   } catch (error: any) {
     console.error("OAuth callback error:", error);
-    console.error("Error stack:", error.stack);
-    
+    // console.error("Error stack:", error.stack);
+   
     return res.status(status.INTERNAL_SERVER_ERROR).send(
       `Authentication failed: ${error.message}`
     );
   }
 });
-
 const redirectToGoogleAuth = catchAsync(async (req: Request, res: Response) => {
-  console.log("Redirecting to Google OAuth");
+  // console.log("Redirecting to Google OAuth");
   const authUrl = googleCalendarService.generateAuthUrl();
-  console.log("Auth URL:", authUrl);
+  // console.log("Auth URL:", authUrl);
   res.redirect(authUrl);
 });
 
