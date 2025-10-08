@@ -63,13 +63,13 @@ const getCallLogsManagement = async (
       callType: true,
       call_status: true,
       call_time: true,
-      call_transcript: true,
+      // call_transcript: true,
 
       name: true,
       contact_number: true,
       company: true,
       area: true,
-      description: true,
+      // description: true,
 
       createdAt: true,
       updatedAt: true,
