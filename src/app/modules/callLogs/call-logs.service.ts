@@ -55,6 +55,7 @@ const getCallLogsManagement = async (
       call_recording: true,
       call_duration: true,
       call_transcript: true,
+      email: true,
       // call_started_at: true,
       // call_completed_at: true,
       // recording_duration: true,
